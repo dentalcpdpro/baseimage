@@ -7,22 +7,43 @@ default-job: &default-job
             # TODO Avoid rebuild if nothing changes (Dockerfile, OS
             # updates, installed dependencies). Implement in general way:
             # `docker run -t cpdpro/baseimage:$CIRCLE_JOB check.$CIRCLE_JOB`
+            - restore_cache:
+                key: "v1:{{ .Environment.CIRCLE_JOB }}:{{ .Branch }}"
+                keys:
+                    - "v1:{{ .Environment.CIRCLE_JOB }}:"
+            - run:
+                name: Load docker image layer cache
+                command: |
+                    docker load -i /var/cache/$CIRCLE_JOB.tar || true
             - run:
                 name: docker build
                 command: |
-                    CIRCLE_BUILD_NUM=${CIRCLE_BUILD_NUM:-0} # for local circleci
-                    docker build --build-arg UPGRADE=$(date -Ihours) \
-                        -f Dockerfile.$CIRCLE_JOB \
+                    docker build \
+                        --build-arg UPGRADE=$(date -Ihours) \
+                        --cache-from cpdpro/baseimage:$CIRCLE_JOB \
                         -t cpdpro/baseimage:$CIRCLE_JOB \
-                        -t cpdpro/baseimage:$CIRCLE_JOB.$CIRCLE_BUILD_NUM \
+                        -f Dockerfile.$CIRCLE_JOB \
                         .
+                    if test "$CIRCLE_BUILD_NUM"; then # empty on local circleci
+                        docker tag cpdpro/baseimage:$CIRCLE_JOB{,.$CIRCLE_BUILD_NUM}
+                    fi
+            - run:
+                name: Save docker image layer cache
+                command: |
+                    docker load -i /var/cache/$CIRCLE_JOB.tar || true
+            - save_cache:
+                key: "v1:{{ .Environment.CIRCLE_JOB }}:{{ .Branch }}"
+                paths:
+                    - /var/cache/$CIRCLE_JOB.tar
             - deploy:
                 name: docker push
                 command: |
                     if test "$CIRCLE_BRANCH" = "master" && test "$DOCKER_USER"; then
                         docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
                         docker push cpdpro/baseimage:$CIRCLE_JOB
-                        docker push cpdpro/baseimage:$CIRCLE_JOB.$CIRCLE_BUILD_NUM
+                        if test "$CIRCLE_BUILD_NUM"; then # empty on local circleci
+                            docker push cpdpro/baseimage:$CIRCLE_JOB.$CIRCLE_BUILD_NUM
+                        fi
                     fi
 
 version: 2
