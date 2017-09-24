@@ -1,0 +1,31 @@
+default-job: &default-job
+        docker:
+            - image: docker:17.06.2-ce-git
+        steps:
+            - checkout
+            - setup_remote_docker
+            # TODO Avoid rebuild if nothing changes (Dockerfile, OS
+            # updates, installed dependencies). Implement in general way:
+            # `docker run -t cpdpro/baseimage:$CIRCLE_JOB check.$CIRCLE_JOB`
+            - run: |
+                CIRCLE_BUILD_NUM=${CIRCLE_BUILD_NUM:-0} # for local circleci
+                docker build --build-arg UPGRADE=$(date -Ihours) \
+                    -f Dockerfile.$CIRCLE_JOB \
+                    -t cpdpro/baseimage:$CIRCLE_JOB \
+                    -t cpdpro/baseimage:$CIRCLE_JOB.$CIRCLE_BUILD_NUM \
+                    .
+        deploy:
+            - run: |
+                if test "$CIRCLE_BRANCH" = "master" && test "$DOCKER_USER"; then
+                    docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
+                    docker push \
+                        cpdpro/baseimage:$CIRCLE_JOB \
+                        cpdpro/baseimage:$CIRCLE_JOB.$CIRCLE_BUILD_NUM
+                fi
+
+version: 2
+jobs:
+    base-narada4d:
+        <<: *default-job
+    build-golang:
+        <<: *default-job

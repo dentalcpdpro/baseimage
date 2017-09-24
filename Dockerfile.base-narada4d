@@ -1,0 +1,27 @@
+FROM powerman/alpine-runit-volume
+
+RUN set -ex -o pipefail; \
+    build_pkgs="wget"; \
+    apk add --no-cache $build_pkgs \
+	ca-certificates tar bash perl; \
+    ### migrate
+    MIGRATE="0.2.6"; \
+    wget -q -O /tmp/migrate.tgz https://github.com/powerman/migrate/archive/v$MIGRATE.tar.gz; \
+    tar xzf /tmp/migrate.tgz -C /tmp/; \
+    mv /tmp/migrate-$MIGRATE/script/* /usr/local/bin/; \
+    mv /tmp/migrate-$MIGRATE/lib/* /usr/local/lib/perl5/site_perl/; \
+    rm -rf /tmp/migrate*; \
+    ### Cleanup
+    apk del $build_pkgs
+
+ENV VOLUME_DIR=/data \
+    SYSLOG_DIR=/data/log \
+    NARADA4D_DIR=/data/var \
+    NARADA4D_SCHEMA=/app/schema \
+    NARADA4D_BACKUP=/data/backup
+WORKDIR /app
+
+CMD ["sh", "-c", "narada4d-try-migrate; exec runsv /etc/sv/runsvdir"]
+
+ARG UPGRADE
+RUN apk --no-cache upgrade
