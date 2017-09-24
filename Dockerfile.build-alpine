@@ -19,5 +19,5 @@ RUN set -ex -o pipefail; \
     ### Cleanup
     apk del $build_pkgs
 
-ARG UPGRADE
+ARG UPGRADE_OS
 RUN apk --no-cache upgrade
