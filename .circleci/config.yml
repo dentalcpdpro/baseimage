@@ -32,7 +32,7 @@ default-job: &default-job
             - run:
                 name: Save docker image layer cache
                 command: |
-                    docker load -i /var/cache/$CIRCLE_JOB.tar || true
+                    docker save -o /var/cache/$CIRCLE_JOB.tar cpdpro/baseimage:$CIRCLE_JOB || true
             - save_cache:
                 key: "v1:{{ .Environment.CIRCLE_JOB }}:{{ .Branch }}"
                 paths:
