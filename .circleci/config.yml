@@ -19,7 +19,7 @@ default-job: &default-job
                 name: Load docker image layer cache
                 command: |
                     ls -l /var/cache/
-                    docker load -i /var/cache/$CIRCLE_JOB.tar || true
+                    docker load -i /var/cache/image.tar || true
             - run:
                 name: docker build
                 command: |
@@ -37,11 +37,11 @@ default-job: &default-job
             - run:
                 name: Save docker image layer cache
                 command: |
-                    docker save -o /var/cache/$CIRCLE_JOB.tar cpdpro/baseimage:$CIRCLE_JOB || true
+                    docker save -o /var/cache/image.tar cpdpro/baseimage:$CIRCLE_JOB || true
             - save_cache:
                 key: "v1:{{ .Environment.CIRCLE_JOB }}:{{ checksum \"/var/cache/key\" }}"
                 paths:
-                    - /var/cache/$CIRCLE_JOB.tar
+                    - /var/cache/image.tar
             - deploy:
                 name: docker push
                 command: |
