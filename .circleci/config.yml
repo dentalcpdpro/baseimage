@@ -12,13 +12,12 @@ default-job: &default-job
                 command:
                     cp Dockerfile.$CIRCLE_JOB /var/cache/key
             - restore_cache:
-                key: "v2:{{ .Environment.CIRCLE_JOB }}:{{ checksum \"/var/cache/key\" }}"
+                key: "v3:{{ .Environment.CIRCLE_JOB }}:{{ checksum \"/var/cache/key\" }}"
                 keys:
-                    - "v2:{{ .Environment.CIRCLE_JOB }}:"
+                    - "v3:{{ .Environment.CIRCLE_JOB }}:"
             - run:
                 name: Load docker image layer cache
                 command: |
-                    ls -l /var/cache/
                     docker load -i /var/cache/image.tar || true
             - run:
                 name: docker build
@@ -37,11 +36,15 @@ default-job: &default-job
             - run:
                 name: Save docker image layer cache
                 command: |
-                    docker save -o /var/cache/image.tar cpdpro/baseimage:$CIRCLE_JOB || true
+                    if test "$(sha256sum </var/cache/key)" != "$(sha256sum </var/cache/key.cached)"; then
+                        docker save -o /var/cache/image.tar cpdpro/baseimage:$CIRCLE_JOB
+                        cp /var/cache/key /var/cache/key.cached
+                    fi
             - save_cache:
-                key: "v2:{{ .Environment.CIRCLE_JOB }}:{{ checksum \"/var/cache/key\" }}"
+                key: "v3:{{ .Environment.CIRCLE_JOB }}:{{ checksum \"/var/cache/key\" }}"
                 paths:
                     - /var/cache/image.tar
+                    - /var/cache/key.cached
             - deploy:
                 name: docker push
                 command: |
