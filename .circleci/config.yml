@@ -8,7 +8,7 @@ default-job: &default-job
             # updates, installed dependencies). Implement in general way:
             # `docker run -t cpdpro/baseimage:$CIRCLE_JOB check.$CIRCLE_JOB`
             - restore_cache:
-                key: "v1:{{ .Environment.CIRCLE_JOB }}:{{ checksum \"Dockerfile.{{ .Environment.CIRCLE_JOB }}\" }}"
+                key: "v1:{{ .Environment.CIRCLE_JOB }}:{{ checksum \"Dockerfile.$CIRCLE_JOB\" }}"
                 keys:
                     - "v1:{{ .Environment.CIRCLE_JOB }}:"
             - run:
@@ -35,7 +35,7 @@ default-job: &default-job
                 command: |
                     docker save -o /var/cache/$CIRCLE_JOB.tar cpdpro/baseimage:$CIRCLE_JOB || true
             - save_cache:
-                key: "v1:{{ .Environment.CIRCLE_JOB }}:{{ checksum \"Dockerfile.{{ .Environment.CIRCLE_JOB }}\" }}"
+                key: "v1:{{ .Environment.CIRCLE_JOB }}:{{ checksum \"Dockerfile.$CIRCLE_JOB\" }}"
                 paths:
                     - /var/cache/$CIRCLE_JOB.tar
             - deploy:
