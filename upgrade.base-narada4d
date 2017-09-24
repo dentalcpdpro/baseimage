@@ -5,3 +5,5 @@ apk update -q
 apk upgrade -s |
 	grep -q Upgrading &&
 	upgrade OS
+
+exit

@@ -9,3 +9,5 @@ find /go/src -type d -name .git -print0 |
 	xargs -0 -P64 -I{} git --git-dir {} --bare fetch --dry-run 2>&1 |
 	grep -q . &&
 	upgrade GO
+
+exit
