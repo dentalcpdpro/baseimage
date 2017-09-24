@@ -7,20 +7,24 @@ default-job: &default-job
             # TODO Avoid rebuild if nothing changes (Dockerfile, OS
             # updates, installed dependencies). Implement in general way:
             # `docker run -t cpdpro/baseimage:$CIRCLE_JOB check.$CIRCLE_JOB`
-            - run: |
-                CIRCLE_BUILD_NUM=${CIRCLE_BUILD_NUM:-0} # for local circleci
-                docker build --build-arg UPGRADE=$(date -Ihours) \
-                    -f Dockerfile.$CIRCLE_JOB \
-                    -t cpdpro/baseimage:$CIRCLE_JOB \
-                    -t cpdpro/baseimage:$CIRCLE_JOB.$CIRCLE_BUILD_NUM \
-                    .
-            - deploy: |
-                if test "$CIRCLE_BRANCH" = "master" && test "$DOCKER_USER"; then
-                    docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
-                    docker push \
-                        cpdpro/baseimage:$CIRCLE_JOB \
-                        cpdpro/baseimage:$CIRCLE_JOB.$CIRCLE_BUILD_NUM
-                fi
+            - run:
+                name: docker build
+                command: |
+                    CIRCLE_BUILD_NUM=${CIRCLE_BUILD_NUM:-0} # for local circleci
+                    docker build --build-arg UPGRADE=$(date -Ihours) \
+                        -f Dockerfile.$CIRCLE_JOB \
+                        -t cpdpro/baseimage:$CIRCLE_JOB \
+                        -t cpdpro/baseimage:$CIRCLE_JOB.$CIRCLE_BUILD_NUM \
+                        .
+            - deploy:
+                name: docker push
+                command: |
+                    if test "$CIRCLE_BRANCH" = "master" && test "$DOCKER_USER"; then
+                        docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
+                        docker push \
+                            cpdpro/baseimage:$CIRCLE_JOB \
+                            cpdpro/baseimage:$CIRCLE_JOB.$CIRCLE_BUILD_NUM
+                    fi
 
 version: 2
 jobs:
