@@ -12,7 +12,7 @@ default-job: &default-job
                 name: Checking for upgrade
                 command: |
                     if docker image ls -q cpdpro/baseimage:$CIRCLE_JOB | grep -q .; then
-                        docker create --name check --rm --entrypoint=sh cpdpro/baseimage:$CIRCLE_JOB /upgrade
+                        docker create --name check --rm --entrypoint=sh cpdpro/baseimage:$CIRCLE_JOB -c /upgrade
                         docker cp -L upgrade.$CIRCLE_JOB check:/upgrade
                         docker start -a check | tee /tmp/upgrade
                     fi
