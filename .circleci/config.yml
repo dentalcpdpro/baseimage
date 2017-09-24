@@ -29,3 +29,9 @@ jobs:
         <<: *default-job
     build-golang:
         <<: *default-job
+workflows:
+    version: 2
+    all:
+        jobs:
+            - base-narada4d
+            - build-golang
