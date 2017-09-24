@@ -25,7 +25,9 @@ default-job: &default-job
                         -f Dockerfile.$CIRCLE_JOB \
                         .
                     if test "$CIRCLE_BUILD_NUM"; then # empty on local circleci
-                        docker tag cpdpro/baseimage:$CIRCLE_JOB{,.$CIRCLE_BUILD_NUM}
+                        docker tag \
+                            cpdpro/baseimage:$CIRCLE_JOB \
+                            cpdpro/baseimage:$CIRCLE_JOB.$CIRCLE_BUILD_NUM
                     fi
             - run:
                 name: Save docker image layer cache
