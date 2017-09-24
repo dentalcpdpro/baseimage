@@ -14,8 +14,7 @@ default-job: &default-job
                     -t cpdpro/baseimage:$CIRCLE_JOB \
                     -t cpdpro/baseimage:$CIRCLE_JOB.$CIRCLE_BUILD_NUM \
                     .
-        deploy:
-            - run: |
+            - deploy: |
                 if test "$CIRCLE_BRANCH" = "master" && test "$DOCKER_USER"; then
                     docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
                     docker push \
