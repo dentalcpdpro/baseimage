@@ -1,6 +1,8 @@
 # https://github.com/golang/go/issues/14481
 FROM golang:1.9
 
+ENTRYPOINT ["bash", "setup-volume", "chpst", "-u", "app"]
+
 # Debian's /bin/sh doesn't support `set -o pipefail`.
 SHELL ["/bin/bash", "-c"]
 
@@ -12,7 +14,8 @@ RUN set -ex -o pipefail; \
     apt install -y --no-install-recommends $build_pkgs \
 	runit; \
     ### setup-volume
-    wget -q -O /usr/local/sbin/setup-volume https://raw.githubusercontent.com/powerman/alpine-runit-volume/master/setup-volume; \
+    SETUP_VOLUME="0.1.0"; \
+    wget -q -O /usr/local/sbin/setup-volume https://raw.githubusercontent.com/powerman/alpine-runit-volume/v$SETUP_VOLUME/setup-volume; \
     chmod +x /usr/local/sbin/setup-volume; \
     ### migrate
     MIGRATE="0.2.6"; \
@@ -30,17 +33,20 @@ RUN set -ex -o pipefail; \
     # https://github.com/golang/go/issues/18315
     go get -v -t gopkg.in/check.v1; \
     go get -v -t github.com/powerman/structlog; \
+    ### Cleanup
+    apt autoremove -y $build_pkgs; \
+    rm -rf /var/lib/apt/lists/*
+
+ARG UPGRADE_OS
+RUN apt update && apt full-upgrade -y && rm -rf /var/lib/apt/lists/*
+
+ARG UPGRADE_GO
+RUN set -ex -o pipefail; \
+    find /go/src -type d -name .git -printf "%h\0" | xargs -0 -P64 -I{} sh -c "cd {}; git pull"; \
+    go get -v -t all; \
     # Speedup static build
     while ! CGO_ENABLED=0 go install -v -installsuffix static all; do go get -v -t all; done; \
     # Keep /go/src ctime/mtime less than /go/{bin,pkg}
     chmod -R a+rwX /go/src; \
     chmod -R a+rwX /go/bin /go/pkg; \
-    find /go/bin /go/pkg -type f -print0 | xargs -0 touch; \
-    ### Cleanup
-    apt autoremove -y $build_pkgs; \
-    rm -rf /var/lib/apt/lists/*
-
-ENTRYPOINT ["bash", "setup-volume", "chpst", "-u", "app"]
-
-ARG UPGRADE
-RUN apt update && apt full-upgrade -y && rm -rf /var/lib/apt/lists/*
+    find /go/bin /go/pkg -type f -print0 | xargs -0 touch

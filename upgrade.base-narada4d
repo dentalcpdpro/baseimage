@@ -1,0 +1,7 @@
+#!/bin/sh
+upgrade() { echo $1; exit; }
+
+apk update -q
+apk upgrade -s |
+	grep -q Upgrading &&
+	upgrade OS

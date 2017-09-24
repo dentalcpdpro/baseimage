@@ -1,0 +1,11 @@
+#!/bin/sh
+upgrade() { echo $1; exit; }
+
+apt update 2>&1 |
+	grep -q "All packages are up to date." ||
+	upgrade OS
+
+find /go/src -type d -name .git -print0 |
+	xargs -0 -P64 -I{} git --git-dir {} --bare fetch --dry-run 2>&1 |
+	grep -q . &&
+	upgrade GO

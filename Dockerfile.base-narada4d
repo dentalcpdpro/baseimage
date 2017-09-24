@@ -1,5 +1,14 @@
 FROM powerman/alpine-runit-volume
 
+ENV VOLUME_DIR=/data \
+    SYSLOG_DIR=/data/log \
+    NARADA4D_DIR=/data/var \
+    NARADA4D_SCHEMA=/app/schema \
+    NARADA4D_BACKUP=/data/backup
+WORKDIR /app
+
+CMD ["sh", "-c", "narada4d-try-migrate; exec runsv /etc/sv/runsvdir"]
+
 RUN set -ex -o pipefail; \
     build_pkgs="wget"; \
     apk add --no-cache $build_pkgs \
@@ -14,14 +23,5 @@ RUN set -ex -o pipefail; \
     ### Cleanup
     apk del $build_pkgs
 
-ENV VOLUME_DIR=/data \
-    SYSLOG_DIR=/data/log \
-    NARADA4D_DIR=/data/var \
-    NARADA4D_SCHEMA=/app/schema \
-    NARADA4D_BACKUP=/data/backup
-WORKDIR /app
-
-CMD ["sh", "-c", "narada4d-try-migrate; exec runsv /etc/sv/runsvdir"]
-
-ARG UPGRADE
+ARG UPGRADE_OS
 RUN apk --no-cache upgrade

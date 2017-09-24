@@ -4,18 +4,23 @@ default-job: &default-job
         steps:
             - checkout
             - setup_remote_docker
-            # TODO Force rebuild if installed dependencies changes.
-            # Implement in general way:
-            # `docker run -t cpdpro/baseimage:$CIRCLE_JOB check.$CIRCLE_JOB`
             - run:
                 name: Load docker image layer cache
                 command: |
                     docker pull cpdpro/baseimage:$CIRCLE_JOB || true
             - run:
+                name: Checking for upgrade
+                command: |
+                    if docker image ls -q cpdpro/baseimage:$CIRCLE_JOB | grep -q .; then
+                        docker create --name check --rm --entrypoint=sh cpdpro/baseimage:$CIRCLE_JOB /upgrade
+                        docker cp -L upgrade.$CIRCLE_JOB check:/upgrade
+                        docker start -a check | tee /tmp/upgrade
+                    fi
+            - run:
                 name: docker build
                 command: |
                     docker build \
-                        --build-arg UPGRADE=$(date -Ihours) \
+                        --build-arg UPGRADE_$(cat /tmp/upgrade 2>/dev/null)=$(date +%s) \
                         --cache-from cpdpro/baseimage:$CIRCLE_JOB \
                         -t cpdpro/baseimage:$CIRCLE_JOB \
                         -f Dockerfile.$CIRCLE_JOB \
