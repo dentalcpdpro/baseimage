@@ -12,9 +12,9 @@ default-job: &default-job
                 command:
                     cp Dockerfile.$CIRCLE_JOB /var/cache/key
             - restore_cache:
-                key: "v1:{{ .Environment.CIRCLE_JOB }}:{{ checksum \"/var/cache/key\" }}"
+                key: "v2:{{ .Environment.CIRCLE_JOB }}:{{ checksum \"/var/cache/key\" }}"
                 keys:
-                    - "v1:{{ .Environment.CIRCLE_JOB }}:"
+                    - "v2:{{ .Environment.CIRCLE_JOB }}:"
             - run:
                 name: Load docker image layer cache
                 command: |
@@ -39,7 +39,7 @@ default-job: &default-job
                 command: |
                     docker save -o /var/cache/image.tar cpdpro/baseimage:$CIRCLE_JOB || true
             - save_cache:
-                key: "v1:{{ .Environment.CIRCLE_JOB }}:{{ checksum \"/var/cache/key\" }}"
+                key: "v2:{{ .Environment.CIRCLE_JOB }}:{{ checksum \"/var/cache/key\" }}"
                 paths:
                     - /var/cache/image.tar
             - deploy:
