@@ -48,8 +48,9 @@ RUN set -ex -o pipefail; \
     ### Speedup static build
     while ! CGO_ENABLED=0 go install -v -installsuffix static all; do go get -v -t ./...; done; \
     ### Enable `go get` as user "app"
-    # Keep /go/src ctime less than /go/{bin,pkg}
+    # Keep /go/src ctime/mtime less than /go/{bin,pkg}
     chmod -R a+rwX /go/src; \
     chmod -R a+rwX /go/bin /go/pkg; \
+    find /go/bin /go/pkg -type f -print0 | xargs -0 touch; \
     ### Cleanup
     rm -rf /tmp/bin
