@@ -28,11 +28,13 @@ RUN set -ex -o pipefail; \
     apt autoremove -y $build_pkgs; \
     rm -rf /var/lib/apt/lists/*
 
-ARG UPGRADE_OS
-RUN apt update && apt full-upgrade -y && rm -rf /var/lib/apt/lists/*
+ARG UPGRADE
+RUN echo $UPGRADE > /var/cache/UPGRADE && \
+    apt update && apt full-upgrade -y && rm -rf /var/lib/apt/lists/*
 
 ARG UPGRADE_GO
 RUN set -ex -o pipefail; \
+    echo $UPGRADE_GO > /var/cache/UPGRADE_GO; \
     ### Common dependencies for our projects
     go get -v golang.org/x/tools/cmd/cover; \
     go get -v github.com/powerman/gotestcover; \
