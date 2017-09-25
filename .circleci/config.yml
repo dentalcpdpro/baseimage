@@ -4,6 +4,7 @@ default-job: &default-job
         steps:
             - checkout
             - setup_remote_docker
+            - run: env
             - run:
                 name: Load docker image layer cache
                 command: |
