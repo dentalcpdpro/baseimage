@@ -24,15 +24,6 @@ RUN set -ex -o pipefail; \
     mv /tmp/migrate-$MIGRATE/script/* /usr/local/bin/; \
     mv /tmp/migrate-$MIGRATE/lib/* /usr/local/lib/site_perl/; \
     rm -rf /tmp/migrate*; \
-    ### Go tools
-    # -t needed to run `go install all` later
-    go get -v -t golang.org/x/{crypto,net,text,tools}/...; \
-    go get -v -t github.com/powerman/gotestcover; \
-    go get -v -t github.com/alecthomas/gometalinter; \
-    gometalinter --install; \
-    # https://github.com/golang/go/issues/18315
-    go get -v -t gopkg.in/check.v1; \
-    go get -v -t github.com/powerman/structlog; \
     ### Cleanup
     apt autoremove -y $build_pkgs; \
     rm -rf /var/lib/apt/lists/*
@@ -42,11 +33,19 @@ RUN apt update && apt full-upgrade -y && rm -rf /var/lib/apt/lists/*
 
 ARG UPGRADE_GO
 RUN set -ex -o pipefail; \
-    find /go/src -type d -name .git -printf "%h\0" | xargs -0 -P64 -I{} sh -c "cd {}; git pull"; \
-    go get -v -t all; \
-    # Speedup static build
-    while ! CGO_ENABLED=0 go install -v -installsuffix static all; do go get -v -t all; done; \
-    # Keep /go/src ctime/mtime less than /go/{bin,pkg}
-    chmod -R a+rwX /go/src; \
-    chmod -R a+rwX /go/bin /go/pkg; \
-    find /go/bin /go/pkg -type f -print0 | xargs -0 touch
+    ### Common dependencies for our projects
+    go get -v golang.org/x/tools/cmd/cover; \
+    go get -v github.com/powerman/gotestcover; \
+    go get -v github.com/alecthomas/gometalinter; \
+    gometalinter --install; \
+    # https://github.com/golang/go/issues/18315
+    go get -v gopkg.in/check.v1; \
+    go get -v github.com/powerman/structlog; \
+    export GOBIN=/tmp/bin; \
+    go get -v golang.org/x/{crypto,net,text,tools}/...; \
+    ### Speedup static build
+    while ! CGO_ENABLED=0 go install -v -installsuffix static all; do go get -v -t ./...; done; \
+    ### Enable `go get` as user "app"
+    chmod -R a+rwX /go; \
+    ### Cleanup
+    rm -rf /tmp/bin
