@@ -13,6 +13,19 @@ RUN set -ex -o pipefail; \
     apt update; \
     apt install -y --no-install-recommends $build_pkgs \
 	runit; \
+    ### docker
+    DOCKER="17.06.2-ce"; \
+    wget -q -O /tmp/docker.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$DOCKER.tgz; \
+    tar -xz -C /tmp -f /tmp/docker.tgz; \
+    mv /tmp/docker/docker /usr/bin; \
+    ### docker-compose
+    DOCKER_COMPOSE="1.16.1"; \
+    wget -q -O /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE/docker-compose-`uname -s`-`uname -m`; \
+    chmod +x /usr/local/bin/docker-compose; \
+    ### AWS cli
+    wget -O /tmp/awscli-bundle.zip https://s3.amazonaws.com/aws-cli/awscli-bundle.zip; \
+    unzip /tmp/awscli-bundle.zip -d /tmp; \
+    /tmp/awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws; \
     ### setup-volume
     SETUP_VOLUME="0.1.0"; \
     wget -q -O /usr/local/sbin/setup-volume https://raw.githubusercontent.com/powerman/alpine-runit-volume/v$SETUP_VOLUME/setup-volume; \
@@ -23,10 +36,9 @@ RUN set -ex -o pipefail; \
     tar xzf /tmp/migrate.tgz -C /tmp/; \
     mv /tmp/migrate-$MIGRATE/script/* /usr/local/bin/; \
     mv /tmp/migrate-$MIGRATE/lib/* /usr/local/lib/site_perl/; \
-    rm -rf /tmp/migrate*; \
     ### Cleanup
     apt autoremove -y $build_pkgs; \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* /tmp/*
 
 ARG UPGRADE
 RUN echo $UPGRADE > /var/cache/UPGRADE && \
