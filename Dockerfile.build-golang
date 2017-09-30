@@ -55,7 +55,6 @@ RUN set -ex -o pipefail; \
     go get -v golang.org/x/tools/cmd/cover; \
     go get -v github.com/powerman/gotestcover; \
     go get -v github.com/alecthomas/gometalinter; \
-    go get -v github.com/tcnksm/ghr; \
     gometalinter --install; \
     # https://github.com/golang/go/issues/18315
     go get -v gopkg.in/check.v1; \
