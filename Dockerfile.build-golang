@@ -37,7 +37,7 @@ RUN set -ex -o pipefail; \
     mv /tmp/migrate-$MIGRATE/script/* /usr/local/bin/; \
     mv /tmp/migrate-$MIGRATE/lib/* /usr/local/lib/site_perl/; \
     ### gotmpl
-    GOTMPL="1.0.0"; \
+    GOTMPL="1.1.0"; \
     wget -q -O /usr/local/bin/gotmpl https://github.com/powerman/gotmpl/releases/download/v$GOTMPL/gotmpl-`uname -s`-`uname -m`; \
     chmod +x /usr/local/bin/gotmpl; \
     ### Cleanup
