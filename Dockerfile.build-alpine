@@ -3,7 +3,7 @@ FROM alpine
 RUN set -ex -o pipefail; \
     build_pkgs="wget"; \
     apk add --no-cache $build_pkgs \
-	git openssh-client tar gzip ca-certificates \
+	git openssh-client tar gzip ca-certificates bash \
 	python; \
     ### docker
     DOCKER="17.06.2-ce"; \
