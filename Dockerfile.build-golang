@@ -23,7 +23,7 @@ RUN set -ex -o pipefail; \
     wget -q -O /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE/docker-compose-`uname -s`-`uname -m`; \
     chmod +x /usr/local/bin/docker-compose; \
     ### AWS cli
-    wget -O /tmp/awscli-bundle.zip https://s3.amazonaws.com/aws-cli/awscli-bundle.zip; \
+    wget -q -O /tmp/awscli-bundle.zip https://s3.amazonaws.com/aws-cli/awscli-bundle.zip; \
     unzip /tmp/awscli-bundle.zip -d /tmp; \
     /tmp/awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws; \
     ### setup-volume

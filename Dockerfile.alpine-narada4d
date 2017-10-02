@@ -19,9 +19,9 @@ RUN set -ex -o pipefail; \
     tar xzf /tmp/migrate.tgz -C /tmp/; \
     mv /tmp/migrate-$MIGRATE/script/* /usr/local/bin/; \
     mv /tmp/migrate-$MIGRATE/lib/* /usr/local/lib/perl5/site_perl/; \
-    rm -rf /tmp/migrate*; \
     ### Cleanup
-    apk del $build_pkgs
+    apk del $build_pkgs; \
+    rm -rf /tmp/*
 
 ARG UPGRADE
 RUN echo $UPGRADE > /var/cache/UPGRADE && \
