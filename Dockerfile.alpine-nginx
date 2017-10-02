@@ -1,9 +1,9 @@
 FROM nginx:alpine
 
-CMD ["sh", "-c", " \
-    awk '/nameserver/{printf\"resolver %s;\n\",$2}' /etc/resolv.conf >/etc/nginx/conf.d/resolver.conf; \
+CMD exec sh -c " \
+    awk '/nameserver/{printf\"resolver %s;\\n\",\$2}' /etc/resolv.conf >/etc/nginx/conf.d/resolver.conf; \
     exec nginx -g 'daemon off;'; \
-    "]
+    "
 
 ARG UPGRADE
 RUN echo $UPGRADE > /var/cache/UPGRADE && \
