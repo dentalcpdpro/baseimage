@@ -11,6 +11,14 @@ apk upgrade -s |
 echo "--build-arg UPGRADE=${UPGRADE:-$(cat /var/cache/UPGRADE)}"
 test -z "$UPGRADE" || exit 0
 
+pecl list-upgrades 2>&1 |
+	grep -v 'No upgrades available' |
+	notgrep -q . ||
+	UPGRADE_PECL=$(date +%s)
+
+echo "--build-arg UPGRADE_PECL=${UPGRADE_PECL:-$(cat /var/cache/UPGRADE_PECL)}"
+test -z "$UPGRADE_PECL" || exit 0
+
 npm outdated 2>/dev/null |
 	notgrep -q . ||
 	UPGRADE_NPM=$(date +%s)

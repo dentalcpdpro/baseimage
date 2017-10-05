@@ -6,13 +6,7 @@ RUN set -ex -o pipefail; \
     apk update; \
     apk upgrade --purge --available; \
     ### Packages
-    build_pkgs=" \
-	autoconf file g++ gcc binutils isl libatomic libc-dev musl-dev \
-	make re2c icu-dev icu-libs libxml2-dev curl-dev libstdc++ libgcc \
-	binutils-libs mpc1 mpfr3 gmp libgomp libbz2 libffi gdbm readline \
-	sqlite-libs libevent libevent-dev libuuid bzip2-dev sudo \
-	wget \
-	"; \
+    build_pkgs="curl-dev libxml2-dev bzip2-dev wget"; \
     apk add $build_pkgs \
 	attr nginx runit socklog dcron \
 	nodejs nodejs-npm python bzip2 git; \
@@ -40,6 +34,14 @@ RUN echo $UPGRADE > /var/cache/UPGRADE && \
     sed -i '/\[::\]/d' /etc/nginx/conf.d/default.conf; \
     sed -i '/\[::\]/d' /usr/local/etc/php-fpm.d/zz-docker.conf; \
     echo -e '#!/bin/sh\nexec setpax em /usr/bin/node "$@"' | install -m 0755 /dev/stdin /usr/local/bin/node
+
+ARG UPGRADE_PECL
+RUN set -ex -o pipefail; \
+    echo $UPGRADE_PECL > /var/cache/UPGRADE_PECL; \
+    build_pkgs="autoconf make gcc musl-dev"; \
+    apk add --no-cache $build_pkgs; \
+    pecl install xdebug; \
+    apk del $build_pkgs
 
 ARG UPGRADE_NPM
 RUN set -ex -o pipefail; \
