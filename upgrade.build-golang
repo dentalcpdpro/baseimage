@@ -5,7 +5,7 @@ set -x -e -o pipefail
 
 apt update 2>&1 |
 	grep -q "All packages are up to date." ||
-	UPGRADE=$(date +s)
+	UPGRADE=$(date +%s)
 
 echo "--build-arg UPGRADE=${UPGRADE:-$(cat /var/cache/UPGRADE)}"
 test -z "$UPGRADE" || exit 0
@@ -13,6 +13,6 @@ test -z "$UPGRADE" || exit 0
 find /go/src -type d -name .git -print0 |
 	xargs -0 -P64 -I{} git --git-dir {} --bare fetch --dry-run 2>&1 |
 	notgrep -q . ||
-	UPGRADE_GO=$(date +s)
+	UPGRADE_GO=$(date +%s)
 
 echo "--build-arg UPGRADE_GO=${UPGRADE_GO:-$(cat /var/cache/UPGRADE_GO)}"

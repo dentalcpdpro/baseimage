@@ -6,6 +6,6 @@ set -x -e -o pipefail
 apk update -q
 apk upgrade -s |
 	notgrep -q Upgrading ||
-	UPGRADE=$(date +s)
+	UPGRADE=$(date +%s)
 
 echo "--build-arg UPGRADE=${UPGRADE:-$(cat /var/cache/UPGRADE)}"
