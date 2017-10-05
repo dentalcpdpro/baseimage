@@ -31,14 +31,15 @@ RUN set -ex -o pipefail; \
     apk del $build_pkgs; \
     rm -rf /var/cache/apk/*
     
+COPY setpax /usr/local/bin/setpax
+
 ARG UPGRADE
 RUN echo $UPGRADE > /var/cache/UPGRADE && \
     apk --no-cache upgrade; \
     ### Host kernel compatibility: support PaX, support disabled IPv6
     sed -i '/\[::\]/d' /etc/nginx/conf.d/default.conf; \
     sed -i '/\[::\]/d' /usr/local/etc/php-fpm.d/zz-docker.conf; \
-    echo -e '#!/bin/sh\nsetfattr -n user.pax.flags -v em /usr/bin/node\nexec /usr/bin/node "$@"' | \
-	install -m 0755 /dev/stdin /usr/local/bin/node
+    echo -e '#!/bin/sh\nexec setpax em /usr/bin/node "$@"' | install -m 0755 /dev/stdin /usr/local/bin/node
 
 ARG UPGRADE_NPM
 RUN set -ex -o pipefail; \
