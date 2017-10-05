@@ -1,0 +1,4 @@
+#!/bin/sh
+exec 2>&1
+awk '/nameserver/{printf "resolver %s;\n", $2}' /etc/resolv.conf >/etc/nginx/conf.d/resolver.conf
+exec nginx -g 'daemon off;'

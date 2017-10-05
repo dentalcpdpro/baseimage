@@ -1,0 +1,62 @@
+FROM php:7.1.10-fpm-alpine
+
+RUN set -ex -o pipefail; \
+    ### alpine-3.6
+    sed -i -e 's/v3\.4/v3\.6/g' /etc/apk/repositories; \
+    apk update; \
+    apk upgrade --purge --available; \
+    ### Packages
+    build_pkgs=" \
+	autoconf file g++ gcc binutils isl libatomic libc-dev musl-dev \
+	make re2c icu-dev icu-libs libxml2-dev curl-dev libstdc++ libgcc \
+	binutils-libs mpc1 mpfr3 gmp libgomp libbz2 libffi gdbm readline \
+	sqlite-libs libevent libevent-dev libuuid bzip2-dev sudo \
+	wget \
+	"; \
+    apk add $build_pkgs \
+	attr nginx runit socklog dcron \
+	nodejs nodejs-npm python bzip2 git; \
+    ### PHP Extensions
+    docker-php-ext-install -j$(grep ^proc /proc/cpuinfo | wc -l) \
+	pdo_mysql mysqli bcmath curl xml zip bz2; \
+    ### setup-volume
+    SETUP_VOLUME="0.1.0"; \
+    wget -q -O /usr/local/sbin/setup-volume https://raw.githubusercontent.com/powerman/alpine-runit-volume/v$SETUP_VOLUME/setup-volume; \
+    chmod +x /usr/local/sbin/setup-volume; \
+    ### Setup services
+    ln -s /etc/sv/socklog-unix  /etc/service/syslog; \
+    ln -s /etc/sv/nginx         /etc/service/; \
+    ln -s /etc/sv/php-fpm       /etc/service/; \
+    ### Cleanup
+    apk del $build_pkgs; \
+    rm -rf /var/cache/apk/*
+    
+ARG UPGRADE
+RUN echo $UPGRADE > /var/cache/UPGRADE && \
+    apk --no-cache upgrade; \
+    ### Host kernel compatibility: support PaX, support disabled IPv6
+    sed -i '/\[::\]/d' /etc/nginx/conf.d/default.conf; \
+    sed -i '/\[::\]/d' /usr/local/etc/php-fpm.d/zz-docker.conf; \
+    echo -e '#!/bin/sh\nsetfattr -n user.pax.flags -v em /usr/bin/node\nexec /usr/bin/node "$@"' | \
+	install -m 0755 /dev/stdin /usr/local/bin/node
+
+ARG UPGRADE_NPM
+RUN set -ex -o pipefail; \
+    echo $UPGRADE_NPM > /var/cache/UPGRADE_NPM; \
+    npm install -g gulp-cli bower
+
+ARG UPGRADE_COMPOSER
+RUN set -ex -o pipefail; \
+    echo $UPGRADE_COMPOSER > /var/cache/UPGRADE_COMPOSER; \
+    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+ENV VOLUME_DIR=/var/www/html
+
+ENTRYPOINT ["setup-volume", "docker-php-entrypoint"]
+
+CMD ["runsv", "/etc/sv/runsvdir"]
+
+# Use more general config (from nginx:alpine)
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+
+COPY sv-nginx-php /etc/sv/

@@ -46,9 +46,11 @@ default-job: &default-job
 
 version: 2
 jobs:
+    alpine-narada4d:
+        <<: *default-job
     alpine-nginx:
         <<: *default-job
-    alpine-narada4d:
+    alpine-nginx-php:
         <<: *default-job
     build-alpine:
         <<: *default-job
@@ -58,7 +60,8 @@ workflows:
     version: 2
     all:
         jobs:
-            - alpine-nginx
             - alpine-narada4d
+            - alpine-nginx
+            - alpine-nginx-php
             - build-alpine
             - build-golang
