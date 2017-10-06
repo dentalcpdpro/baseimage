@@ -32,3 +32,10 @@ composer self-update --no-ansi --no-interaction --no-progress 2>&1 |
 
 echo "--build-arg UPGRADE_COMPOSER=${UPGRADE_COMPOSER:-$(cat /var/cache/UPGRADE_COMPOSER)}"
 test -z "$UPGRADE_COMPOSER" || exit 0
+
+HOME=/home/www-data chpst -u www-data composer global update --dry-run --no-ansi --no-interaction --no-progress 2>&1 |
+	grep -q "Nothing to install or update" ||
+	UPGRADE_COMPOSER_PKGS=$(date +%s)
+
+echo "--build-arg UPGRADE_COMPOSER_PKGS=${UPGRADE_COMPOSER_PKGS:-$(cat /var/cache/UPGRADE_COMPOSER_PKGS)}"
+test -z "$UPGRADE_COMPOSER_PKGS" || exit 0
