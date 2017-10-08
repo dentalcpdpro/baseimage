@@ -15,7 +15,7 @@ RUN set -ex -o pipefail; \
     build_pkgs="curl-dev libxml2-dev bzip2-dev wget"; \
     apk add $build_pkgs \
 	attr nginx runit socklog dcron \
-	nodejs nodejs-npm python bzip2 git; \
+	nodejs nodejs-npm python bzip2 unzip git; \
     echo em /usr/bin/node > /etc/paxmark.d/nodejs; \
     ### PHP Extensions
     docker-php-ext-install -j$(grep ^proc /proc/cpuinfo | wc -l) \
