@@ -4,7 +4,7 @@ RUN set -ex -o pipefail; \
     build_pkgs="wget"; \
     apk add --no-cache $build_pkgs \
 	git openssh-client tar gzip ca-certificates bash \
-	python; \
+	python jq; \
     ### docker
     DOCKER="17.06.2-ce"; \
     wget -q -O /tmp/docker.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$DOCKER.tgz; \

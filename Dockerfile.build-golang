@@ -12,7 +12,7 @@ RUN set -ex -o pipefail; \
     build_pkgs="unzip"; \
     apt update; \
     apt install -y --no-install-recommends $build_pkgs \
-	runit; \
+	runit jq; \
     ### docker
     DOCKER="17.06.2-ce"; \
     wget -q -O /tmp/docker.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$DOCKER.tgz; \
