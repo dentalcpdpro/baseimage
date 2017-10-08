@@ -56,6 +56,8 @@ jobs:
         <<: *default-job
     build-golang:
         <<: *default-job
+    codeceptjs:
+        <<: *default-job
 workflows:
     version: 2
     all:
@@ -65,3 +67,4 @@ workflows:
             - alpine-nginx-php
             - build-alpine
             - build-golang
+            - codeceptjs
