@@ -1,0 +1,2 @@
+#!/bin/sh
+echo "--build-arg UPGRADE=$(cat /var/cache/UPGRADE)"

@@ -1,0 +1,7 @@
+#!/bin/bash
+for f in /etc/paxmark.d/*; do
+	read mode file <"$f"
+	setfattr -n user.pax.flags -v "$mode" "$file"
+done
+sync
+test $# == 0 || exec "$@"

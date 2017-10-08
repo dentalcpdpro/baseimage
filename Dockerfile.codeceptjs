@@ -1,0 +1,22 @@
+FROM codeception/codeceptjs
+# This image's only difference is support for hardened PaX kernel on host.
+
+# Debian's /bin/sh doesn't support `set -o pipefail`.
+SHELL ["/bin/bash", "-c"]
+
+COPY paxmark.debian /usr/local/bin/paxmark
+
+RUN set -ex -o pipefail; \
+    apt update; \
+    apt install -y --no-install-recommends attr; \
+    mkdir -p /etc/paxmark.d; \
+    echo em /usr/local/bin/node > /etc/paxmark.d/nodejs; \
+    echo em /node_modules/electron/dist/electron > /etc/paxmark.d/electron; \
+    rm -rf /var/lib/apt/lists/*
+
+ENTRYPOINT ["paxmark", "/docker/entrypoint"]
+CMD ["bash", "/docker/run.sh"]
+
+# No needs to upgrade, add this just to reuse default CI build task.
+ARG UPGRADE
+RUN echo $UPGRADE > /var/cache/UPGRADE
