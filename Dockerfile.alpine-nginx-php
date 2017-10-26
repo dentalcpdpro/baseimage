@@ -15,7 +15,8 @@ RUN set -ex -o pipefail; \
     build_pkgs="curl-dev libxml2-dev bzip2-dev wget"; \
     apk add $build_pkgs \
 	attr nginx runit socklog dcron \
-	nodejs nodejs-npm python bzip2 unzip git; \
+	nodejs nodejs-npm python bzip2 unzip git \
+	imagemagick graphicsmagick; \
     echo em /usr/bin/node > /etc/paxmark.d/nodejs; \
     ### PHP Extensions
     docker-php-ext-install -j$(grep ^proc /proc/cpuinfo | wc -l) \
@@ -39,10 +40,14 @@ ARG UPGRADE_PECL
 RUN set -ex -o pipefail; \
     echo $UPGRADE_PECL > /var/cache/UPGRADE_PECL; \
     build_pkgs="autoconf make gcc musl-dev"; \
+    build_pkgs="$build_pkgs imagemagick-dev graphicsmagick-dev pcre-dev libtool"; \
     apk add --no-cache $build_pkgs; \
     pecl install xdebug; \
     echo zend_extension=$(echo /usr/local/lib/php/extensions/no-debug-non-zts-*/xdebug.so) \
 	> /usr/local/etc/php/conf.d/xdebug.ini-disabled; \
+    pecl install imagick; \
+    # no stable version yet
+    pecl install channel://pecl.php.net/gmagick-2.0.4RC1; \
     apk del $build_pkgs
 
 ARG UPGRADE_NPM
