@@ -2,6 +2,7 @@
 FROM golang:1.9
 
 ENTRYPOINT ["bash", "setup-volume", "chpst", "-u", "app"]
+ENV HOME=/home/app
 
 # Debian's /bin/sh doesn't support `set -o pipefail`.
 SHELL ["/bin/bash", "-c"]
