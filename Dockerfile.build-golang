@@ -20,7 +20,7 @@ RUN set -ex -o pipefail; \
     tar -xz -C /tmp -f /tmp/docker.tgz; \
     mv /tmp/docker/docker /usr/bin; \
     ### docker-compose
-    DOCKER_COMPOSE="1.16.1"; \
+    DOCKER_COMPOSE="1.17.1"; \
     wget -q -O /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE/docker-compose-`uname -s`-`uname -m`; \
     chmod +x /usr/local/bin/docker-compose; \
     ### AWS cli
@@ -28,7 +28,7 @@ RUN set -ex -o pipefail; \
     unzip /tmp/awscli-bundle.zip -d /tmp; \
     /tmp/awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws; \
     ### setup-volume
-    SETUP_VOLUME="0.1.0"; \
+    SETUP_VOLUME="0.2.0"; \
     wget -q -O /usr/local/sbin/setup-volume https://raw.githubusercontent.com/powerman/alpine-runit-volume/v$SETUP_VOLUME/setup-volume; \
     chmod +x /usr/local/sbin/setup-volume; \
     ### migrate

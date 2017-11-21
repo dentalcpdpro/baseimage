@@ -12,14 +12,14 @@ RUN set -ex -o pipefail; \
     mv /tmp/docker/docker /usr/bin; \
     ### glibc for docker-compose
     # https://github.com/docker/compose/blob/master/Dockerfile.run
-    GLIBC="2.25-r0"; \
+    GLIBC="2.26-r0"; \
     wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://raw.githubusercontent.com/sgerrand/alpine-pkg-glibc/master/sgerrand.rsa.pub; \
     wget -q -O /tmp/glibc.apk https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$GLIBC/glibc-$GLIBC.apk; \
     apk add /tmp/glibc.apk; \
     rm /tmp/glibc.apk; \
     ln -s /lib/libz.so.1 /lib/libc.musl-x86_64.so.1 /usr/glibc-compat/lib/; \
     ### docker-compose
-    DOCKER_COMPOSE="1.16.1"; \
+    DOCKER_COMPOSE="1.17.1"; \
     wget -q -O /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE/docker-compose-`uname -s`-`uname -m`; \
     chmod +x /usr/local/bin/docker-compose; \
     ### AWS cli
