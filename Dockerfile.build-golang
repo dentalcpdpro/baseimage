@@ -1,7 +1,7 @@
 # https://github.com/golang/go/issues/14481
 FROM golang:1.9
 
-ENTRYPOINT ["bash", "setup-volume", "env", "HOME=/home/app", "chpst", "-u", "app"]
+ENTRYPOINT ["bash", "setup-volume", "sudo", "-EHu", "app"]
 
 # Debian's /bin/sh doesn't support `set -o pipefail`.
 SHELL ["/bin/bash", "-c"]
@@ -12,7 +12,7 @@ RUN set -ex -o pipefail; \
     build_pkgs="unzip"; \
     apt update; \
     apt install -y --no-install-recommends $build_pkgs \
-	runit jq; \
+	sudo runit jq; \
     ### docker
     DOCKER="17.06.2-ce"; \
     wget -q -O /tmp/docker.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$DOCKER.tgz; \
