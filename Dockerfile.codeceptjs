@@ -11,11 +11,11 @@ RUN set -ex -o pipefail; \
     apt install -y --no-install-recommends attr; \
     mkdir -p /etc/paxmark.d; \
     echo em /usr/local/bin/node > /etc/paxmark.d/nodejs; \
-    echo em /node_modules/electron/dist/electron > /etc/paxmark.d/electron; \
+    echo em /codecept/node_modules/electron/dist/electron > /etc/paxmark.d/electron; \
     rm -rf /var/lib/apt/lists/*
 
-ENTRYPOINT ["paxmark", "/docker/entrypoint"]
-CMD ["bash", "/docker/run.sh"]
+ENTRYPOINT ["paxmark", "docker/entrypoint"]
+CMD ["bash", "docker/run.sh"]
 
 # No needs to upgrade, add this just to reuse default CI build task.
 ARG UPGRADE
