@@ -21,7 +21,7 @@ RUN set -ex -o pipefail; \
     echo em /usr/bin/node > /etc/paxmark.d/nodejs; \
     ### PHP Extensions
     docker-php-ext-install -j$(grep ^proc /proc/cpuinfo | wc -l) \
-	pdo_mysql mysqli bcmath curl xml zip bz2; \
+	pdo_mysql mysqli bcmath curl xml zip bz2 pcntl; \
     ### Setup services
     ln -s /etc/sv/socklog-unix  /etc/service/syslog; \
     ln -s /etc/sv/nginx         /etc/service/; \
