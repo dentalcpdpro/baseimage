@@ -54,6 +54,7 @@ RUN set -ex -o pipefail; \
     echo $UPGRADE_GO > /var/cache/UPGRADE_GO; \
     ### Common dependencies for our projects
     # https://github.com/golang/go/issues/18315
+    go get -v golang.org/x/sys/unix; \
     echo -n \
 	github.com/PuerkitoBio/goquery              \
 	github.com/alecthomas/gometalinter          \
