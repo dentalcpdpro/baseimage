@@ -6,20 +6,19 @@ RUN set -ex -o pipefail; \
 	git openssh-client tar gzip ca-certificates bash \
 	python jq; \
     ### docker
-    DOCKER="17.06.2-ce"; \
+    DOCKER="17.09.1-ce"; \
     wget -q -O /tmp/docker.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$DOCKER.tgz; \
     tar -xz -C /tmp -f /tmp/docker.tgz; \
     mv /tmp/docker/docker /usr/bin; \
     ### glibc for docker-compose
     # https://github.com/docker/compose/blob/master/Dockerfile.run
-    GLIBC="2.26-r0"; \
+    GLIBC="2.27-r0"; \
     wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://raw.githubusercontent.com/sgerrand/alpine-pkg-glibc/master/sgerrand.rsa.pub; \
-    wget -q -O /tmp/glibc.apk https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$GLIBC/glibc-$GLIBC.apk; \
-    apk add /tmp/glibc.apk; \
-    rm /tmp/glibc.apk; \
+    wget -q -O /tmp/glibc-$GLIBC.apk https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$GLIBC/glibc-$GLIBC.apk; \
+    apk add /tmp/glibc-$GLIBC.apk; \
     ln -s /lib/libz.so.1 /lib/libc.musl-x86_64.so.1 /usr/glibc-compat/lib/; \
     ### docker-compose
-    DOCKER_COMPOSE="1.17.1"; \
+    DOCKER_COMPOSE="1.19.0"; \
     wget -q -O /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE/docker-compose-`uname -s`-`uname -m`; \
     chmod +x /usr/local/bin/docker-compose; \
     ### AWS cli
