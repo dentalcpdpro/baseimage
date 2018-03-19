@@ -14,8 +14,8 @@ RUN set -ex -o pipefail; \
     echo em /codecept/node_modules/electron/dist/electron > /etc/paxmark.d/electron; \
     rm -rf /var/lib/apt/lists/*
 
-ENTRYPOINT ["paxmark", "docker/entrypoint"]
-CMD ["bash", "docker/run.sh"]
+ENTRYPOINT ["paxmark", "/codecept/docker/entrypoint"]
+CMD ["bash", "/codecept/docker/run.sh"]
 
 # No needs to upgrade, add this just to reuse default CI build task.
 ARG UPGRADE
