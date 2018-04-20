@@ -59,8 +59,11 @@ RUN set -ex -o pipefail; \
 	github.com/PuerkitoBio/goquery              \
 	github.com/alecthomas/gometalinter          \
 	github.com/dgrijalva/jwt-go                 \
+	github.com/go-playground/form               \
+	github.com/go-sql-driver/mysql              \
 	github.com/gorilla/websocket                \
 	github.com/hashicorp/consul                 \
+	github.com/nbutton23/zxcvbn-go              \
 	github.com/pborman/uuid                     \
 	github.com/powerman/check                   \
 	github.com/powerman/gotest/...              \
@@ -69,8 +72,10 @@ RUN set -ex -o pipefail; \
 	github.com/powerman/narada-go/...           \
 	github.com/powerman/rpc-codec/jsonrpc2      \
 	github.com/powerman/structlog               \
+	github.com/powerman/urlvalues               \
 	golang.org/x/tools/cmd/cover                \
 	gopkg.in/check.v1                           \
+	gopkg.in/go-playground/validator.v9         \
 	gopkg.in/yaml.v2                            \
 	| xargs -P 8 -l -d " " go get -v; \
     gometalinter --install; \
