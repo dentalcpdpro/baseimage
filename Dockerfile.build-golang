@@ -55,6 +55,7 @@ RUN set -ex -o pipefail; \
     ### Common dependencies for our projects
     # https://github.com/golang/go/issues/18315
     go get -v golang.org/x/sys/unix; \
+    go get -v github.com/go-playground/locales/...; \
     echo -n \
 	github.com/PuerkitoBio/goquery              \
 	github.com/alecthomas/gometalinter          \
@@ -62,7 +63,7 @@ RUN set -ex -o pipefail; \
 	github.com/go-playground/form               \
 	github.com/go-sql-driver/mysql              \
 	github.com/gorilla/websocket                \
-	github.com/hashicorp/consul                 \
+	github.com/hashicorp/consul/...             \
 	github.com/nbutton23/zxcvbn-go              \
 	github.com/pborman/uuid                     \
 	github.com/powerman/check                   \
@@ -75,14 +76,24 @@ RUN set -ex -o pipefail; \
 	github.com/powerman/urlvalues               \
 	golang.org/x/tools/cmd/cover                \
 	gopkg.in/check.v1                           \
+	gopkg.in/go-playground/assert.v1            \
 	gopkg.in/go-playground/validator.v9         \
 	gopkg.in/yaml.v2                            \
+	github.com/go-playground/pure/...           \
+	github.com/gotestyourself/gotestyourself/...\
+	github.com/smartystreets/assertions/...     \
+	github.com/smartystreets/gunit              \
+	github.com/stretchr/objx                    \
+	github.com/stretchr/testify/...             \
 	| xargs -P 8 -l -d " " go get -v; \
     gometalinter --install; \
+    # https://github.com/go-playground/pure/issues/7
+    rm -rf $(go env GOPATH)/src/github.com/go-playground/universal-translator/examples/; \
     export GOBIN=/tmp/bin; \
     go get -v golang.org/x/{crypto,net,text,tools}/...; \
     ### Speedup static build
-    while ! CGO_ENABLED=0 go install -v -installsuffix static all; do go get -v -t ./...; done; \
+    go get -v -t all; \
+    for i in 1 2; do CGO_ENABLED=0 go install -v -installsuffix static all || go get -v -t all || :; done; \
     ### Enable `go get` as user "app"
     # Keep /go/src ctime/mtime less than /go/{bin,pkg}
     chmod -R a+rwX /go/src; \
