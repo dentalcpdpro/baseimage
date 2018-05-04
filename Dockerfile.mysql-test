@@ -1,0 +1,19 @@
+FROM mysql:5.6
+
+RUN set -ex; \
+    MYSQL_ALLOW_EMPTY_PASSWORD=yes docker-entrypoint.sh --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci & \
+    while ! echo SELECT 1 | mysql -uroot -h127.0.0.1 2>/dev/null | grep -qx 1; do sleep 1; done; \
+    pid="$(cat /var/run/mysqld/mysqld.pid)"; \
+    kill -s TERM "$pid"; \
+    wait "$pid"; \
+    cp -a /var/lib/mysql /var/lib/mysql.ready
+
+ENTRYPOINT ["bash", "-c", " \
+    test -d /var/lib/mysql/mysql || cp -a /var/lib/mysql.ready/* /var/lib/mysql && \
+    exec docker-entrypoint.sh \"$0\" \"$@\" \
+    "]
+CMD ["mysqld"]
+
+# No needs to upgrade, add this just to reuse default CI build task.
+ARG UPGRADE
+RUN echo $UPGRADE > /var/cache/UPGRADE
