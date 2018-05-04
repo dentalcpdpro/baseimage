@@ -58,6 +58,8 @@ jobs:
         <<: *default-job
     codeceptjs:
         <<: *default-job
+    mysql-test:
+        <<: *default-job
 workflows:
     version: 2
     all:
@@ -68,3 +70,4 @@ workflows:
             - build-alpine
             - build-golang
             - codeceptjs
+            - mysql-test
