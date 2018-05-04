@@ -54,13 +54,16 @@ RUN set -ex -o pipefail; \
     echo $UPGRADE_GO > /var/cache/UPGRADE_GO; \
     ### Common dependencies for our projects
     # https://github.com/golang/go/issues/18315
-    go get -v golang.org/x/sys/unix; \
-    go get -v github.com/go-playground/locales/...; \
+    echo -n \
+	golang.org/x/sys/unix                       \
+	github.com/go-playground/locales/...        \
+	github.com/go-playground/form               \
+	| xargs -P 8 -l -d " " go get -v; \
     echo -n \
 	github.com/PuerkitoBio/goquery              \
 	github.com/alecthomas/gometalinter          \
 	github.com/dgrijalva/jwt-go                 \
-	github.com/go-playground/form               \
+	github.com/go-playground/pure/...           \
 	github.com/go-sql-driver/mysql              \
 	github.com/gorilla/websocket                \
 	github.com/hashicorp/consul/...             \
@@ -71,20 +74,20 @@ RUN set -ex -o pipefail; \
 	github.com/powerman/gotestcover             \
 	github.com/powerman/must                    \
 	github.com/powerman/narada-go/...           \
+	github.com/powerman/narada4d/...            \
 	github.com/powerman/rpc-codec/jsonrpc2      \
 	github.com/powerman/structlog               \
 	github.com/powerman/urlvalues               \
+	github.com/smartystreets/assertions/...     \
+	github.com/smartystreets/gunit              \
+	github.com/stretchr/objx                    \
+	github.com/stretchr/testify/...             \
 	golang.org/x/tools/cmd/cover                \
 	gopkg.in/check.v1                           \
 	gopkg.in/go-playground/assert.v1            \
 	gopkg.in/go-playground/validator.v9         \
 	gopkg.in/yaml.v2                            \
-	github.com/go-playground/pure/...           \
-	github.com/gotestyourself/gotestyourself/...\
-	github.com/smartystreets/assertions/...     \
-	github.com/smartystreets/gunit              \
-	github.com/stretchr/objx                    \
-	github.com/stretchr/testify/...             \
+	gotest.tools/...                            \
 	| xargs -P 8 -l -d " " go get -v; \
     gometalinter --install; \
     # https://github.com/go-playground/pure/issues/7
