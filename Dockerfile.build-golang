@@ -1,11 +1,13 @@
 # https://github.com/golang/go/issues/14481
 FROM golang:1.10
 
-ENTRYPOINT ["setup-volume", "bash", "-c", \
-    "HOME=/home/app exec chpst -u $(groups app | sed 's/ /:/g;s/:\\+/:/g') \"$0\" \"$@\""]
-
 # Debian's /bin/sh doesn't support `set -o pipefail`.
 SHELL ["/bin/bash", "-c"]
+
+ENTRYPOINT \
+    setup-volume true; \
+    chmod 0777 $VOLUME_DIR/..; \
+    HOME=/home/app exec chpst -u $(groups app | sed 's/ /:/g;s/:\+/:/g') "$0" "$@";
 
 RUN set -ex -o pipefail; \
     mkdir -p /usr/local/sbin; \
