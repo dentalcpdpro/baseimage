@@ -17,12 +17,12 @@ RUN set -ex -o pipefail; \
     apt install -y --no-install-recommends $build_pkgs \
 	sudo runit jq; \
     ### docker
-    DOCKER="17.09.1-ce"; \
+    DOCKER="17.12.1-ce"; \
     wget -q -O /tmp/docker.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$DOCKER.tgz; \
     tar -xz -C /tmp -f /tmp/docker.tgz; \
     mv /tmp/docker/docker /usr/bin; \
     ### docker-compose
-    DOCKER_COMPOSE="1.19.0"; \
+    DOCKER_COMPOSE="1.21.2"; \
     wget -q -O /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE/docker-compose-`uname -s`-`uname -m`; \
     chmod +x /usr/local/bin/docker-compose; \
     ### AWS cli

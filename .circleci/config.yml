@@ -54,6 +54,8 @@ jobs:
         <<: *default-job
     build-alpine:
         <<: *default-job
+    build-nodejs:
+        <<: *default-job
     build-golang:
         <<: *default-job
     codeceptjs:
@@ -68,6 +70,7 @@ workflows:
             - alpine-nginx
             - alpine-nginx-php
             - build-alpine
+            - build-nodejs
             - build-golang
             - codeceptjs
             - mysql-test
