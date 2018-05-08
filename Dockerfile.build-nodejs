@@ -2,11 +2,6 @@ FROM alpine
 
 COPY paxmark /usr/local/bin/
 
-ENTRYPOINT \
-    paxmark; \
-    setup-volume true; \
-    HOME=/home/app exec chpst -u $(groups app | sed 's/ /:/g;s/:\+/:/g') "$0" "$@";
-
 RUN set -ex -o pipefail; \
     mkdir -p /usr/local/sbin; \
     build_pkgs="wget"; \
@@ -52,4 +47,10 @@ ARG UPGRADE
 RUN echo $UPGRADE > /var/cache/UPGRADE && \
     apk --no-cache upgrade; \
     paxmark; \
-    yarn global add ember-cli bower npm
+    yarn global add ember-cli bower npm node-sass phantomjs-prebuilt
+
+ENTRYPOINT \
+    paxmark; \
+    setup-volume true; \
+    test -d /.cache && ln -s /.cache /home/app; \
+    HOME=/home/app exec chpst -u $(groups app | sed 's/ /:/g;s/:\+/:/g') "$0" "$@";
