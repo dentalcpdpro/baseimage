@@ -20,6 +20,7 @@ RUN set -ex -o pipefail; \
     ### Compatibility with PaX kernel for existing packages
     mkdir -p /etc/paxmark.d; \
     echo em /usr/bin/node > /etc/paxmark.d/nodejs; \
+    echo em /usr/lib/chromium/chrome >/etc/paxmark.d/chromium; \
     ### docker
     DOCKER="17.12.1-ce"; \
     wget -q -O /tmp/docker.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$DOCKER.tgz; \
