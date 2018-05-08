@@ -16,7 +16,7 @@ RUN set -ex -o pipefail; \
     build_pkgs="wget"; \
     apk add $build_pkgs \
 	git openssh-client tar gzip ca-certificates bash attr runit sudo \
-	python jq yarn@edge nodejs; \
+	python jq yarn@edge nodejs chromium@edge; \
     ### Compatibility with PaX kernel for existing packages
     mkdir -p /etc/paxmark.d; \
     echo em /usr/bin/node > /etc/paxmark.d/nodejs; \
