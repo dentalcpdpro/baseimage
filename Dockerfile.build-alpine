@@ -18,7 +18,7 @@ RUN set -ex -o pipefail; \
     apk add /tmp/glibc-$GLIBC.apk; \
     ln -s /lib/libz.so.1 /lib/libc.musl-x86_64.so.1 /usr/glibc-compat/lib/; \
     ### docker-compose
-    DOCKER_COMPOSE="1.21.2"; \
+    DOCKER_COMPOSE="1.19.0"; \
     wget -q -O /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE/docker-compose-`uname -s`-`uname -m`; \
     chmod +x /usr/local/bin/docker-compose; \
     ### AWS cli
