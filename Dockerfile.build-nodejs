@@ -1,13 +1,22 @@
-FROM alpine
+FROM alpine:3.7
 
 COPY paxmark /usr/local/bin/
 
+ENTRYPOINT \
+    paxmark; \
+    setup-volume true; \
+    test -d /.cache && ln -s /.cache /home/app; \
+    HOME=/home/app exec chpst -u $(groups app | sed 's/ /:/g;s/:\+/:/g') "$0" "$@"
+
 RUN set -ex -o pipefail; \
     mkdir -p /usr/local/sbin; \
+    sed -n -e 's/^/@edge /;s/v3.7/edge/p' /etc/apk/repositories >>/etc/apk/repositories; \
+    apk update; \
+    apk upgrade --purge --available; \
     build_pkgs="wget"; \
-    apk add --no-cache $build_pkgs \
+    apk add $build_pkgs \
 	git openssh-client tar gzip ca-certificates bash attr runit sudo \
-	python jq yarn nodejs; \
+	python jq yarn@edge nodejs; \
     ### Compatibility with PaX kernel for existing packages
     mkdir -p /etc/paxmark.d; \
     echo em /usr/bin/node > /etc/paxmark.d/nodejs; \
@@ -39,18 +48,19 @@ RUN set -ex -o pipefail; \
     GOTMPL="1.1.1"; \
     wget -q -O /usr/local/bin/gotmpl https://github.com/powerman/gotmpl/releases/download/v$GOTMPL/gotmpl-`uname -s`-`uname -m`; \
     chmod +x /usr/local/bin/gotmpl; \
+    ### yarn common deps (binary packages which download themselves on install)
+    paxmark; \
+    yarn global add ember-cli bower npm node-sass phantomjs-prebuilt; \
     ### Cleanup
     apk del $build_pkgs; \
     rm -rf /tmp/*
 
 ARG UPGRADE
 RUN echo $UPGRADE > /var/cache/UPGRADE && \
-    apk --no-cache upgrade; \
-    paxmark; \
-    yarn global add ember-cli bower npm node-sass phantomjs-prebuilt
+    apk --no-cache upgrade
 
-ENTRYPOINT \
+ARG UPGRADE_YARN
+RUN set -ex -o pipefail; \
+    echo $UPGRADE_YARN > /var/cache/UPGRADE_YARN; \
     paxmark; \
-    setup-volume true; \
-    test -d /.cache && ln -s /.cache /home/app; \
-    HOME=/home/app exec chpst -u $(groups app | sed 's/ /:/g;s/:\+/:/g') "$0" "$@";
+    yarn global upgrade
