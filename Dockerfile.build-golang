@@ -22,7 +22,7 @@ RUN set -ex -o pipefail; \
     tar -xz -C /tmp -f /tmp/docker.tgz; \
     mv /tmp/docker/docker /usr/bin; \
     ### docker-compose
-    DOCKER_COMPOSE="1.21.2"; \
+    DOCKER_COMPOSE="1.19.0"; \
     wget -q -O /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE/docker-compose-`uname -s`-`uname -m`; \
     chmod +x /usr/local/bin/docker-compose; \
     ### AWS cli
@@ -63,7 +63,6 @@ RUN set -ex -o pipefail; \
 	| xargs -P 8 -l -d " " go get -v; \
     echo -n \
 	github.com/PuerkitoBio/goquery              \
-	github.com/alecthomas/gometalinter          \
 	github.com/dgrijalva/jwt-go                 \
 	github.com/go-playground/pure/...           \
 	github.com/go-sql-driver/mysql              \
@@ -73,7 +72,6 @@ RUN set -ex -o pipefail; \
 	github.com/pborman/uuid                     \
 	github.com/powerman/check                   \
 	github.com/powerman/gotest/...              \
-	github.com/powerman/gotestcover             \
 	github.com/powerman/must                    \
 	github.com/powerman/narada-go/...           \
 	github.com/powerman/narada4d/...            \
@@ -84,14 +82,14 @@ RUN set -ex -o pipefail; \
 	github.com/smartystreets/gunit              \
 	github.com/stretchr/objx                    \
 	github.com/stretchr/testify/...             \
-	golang.org/x/tools/cmd/cover                \
+	github.com/stripe/stripe-go                 \
 	gopkg.in/check.v1                           \
 	gopkg.in/go-playground/assert.v1            \
+	gopkg.in/go-playground/mold.v2/modifiers    \
 	gopkg.in/go-playground/validator.v9         \
 	gopkg.in/yaml.v2                            \
 	gotest.tools/...                            \
 	| xargs -P 8 -l -d " " go get -v; \
-    gometalinter --install; \
     # https://github.com/go-playground/pure/issues/7
     rm -rf $(go env GOPATH)/src/github.com/go-playground/universal-translator/examples/; \
     export GOBIN=/tmp/bin; \
@@ -99,6 +97,16 @@ RUN set -ex -o pipefail; \
     ### Speedup static build
     go get -v -t all; \
     for i in 1 2; do CGO_ENABLED=0 go install -v -installsuffix static all || go get -v -t all || :; done; \
+    unset GOBIN; \
+    ### Tools
+    echo -n \
+	github.com/alecthomas/gometalinter          \
+	github.com/cheekybits/genny/generic         \
+	github.com/golangci/golangci-lint/cmd/...   \
+	github.com/powerman/gotestcover             \
+	golang.org/x/tools/cmd/cover                \
+	| xargs -P 8 -l -d " " go get -v; \
+    gometalinter --install; \
     ### Enable `go get` as user "app"
     # Keep /go/src ctime/mtime less than /go/{bin,pkg}
     chmod -R a+rwX /go/src; \
