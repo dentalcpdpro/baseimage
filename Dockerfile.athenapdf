@@ -1,0 +1,21 @@
+FROM arachnysdocker/athenapdf-service:2
+# This image's only difference is support for hardened PaX kernel on host.
+
+# Debian's /bin/sh doesn't support `set -o pipefail`.
+SHELL ["/bin/bash", "-c"]
+
+COPY paxmark.debian /usr/local/bin/paxmark
+
+RUN set -ex -o pipefail; \
+    apt update; \
+    apt install -y --no-install-recommends attr; \
+    mkdir -p /etc/paxmark.d; \
+    echo em /athenapdf/athenapdf > /etc/paxmark.d/athenapdf; \
+    rm -rf /var/lib/apt/lists/*
+
+ENTRYPOINT ["paxmark", "/athenapdf-service/conf/entrypoint.sh"]
+CMD ["dumb-init", "weaver"]
+
+# No needs to upgrade, add this just to reuse default CI build task.
+ARG UPGRADE
+RUN echo $UPGRADE > /var/cache/UPGRADE

@@ -60,6 +60,8 @@ jobs:
         <<: *default-job
     codeceptjs:
         <<: *default-job
+    athenapdf:
+        <<: *default-job
     mysql-test:
         <<: *default-job
 workflows:
@@ -73,4 +75,5 @@ workflows:
             - build-nodejs
             - build-golang
             - codeceptjs
+            - athenapdf
             - mysql-test
