@@ -14,8 +14,9 @@ RUN set -ex -o pipefail; \
     mkdir -p /usr/local/lib/site_perl; \
     build_pkgs="unzip"; \
     apt update; \
+    # libsasl2-dev for github.com/hashicorp/consul ?!?!?
     apt install -y --no-install-recommends $build_pkgs \
-	sudo runit jq; \
+	sudo runit jq libsasl2-dev; \
     ### docker
     DOCKER="17.12.1-ce"; \
     wget -q -O /tmp/docker.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$DOCKER.tgz; \
@@ -63,6 +64,7 @@ RUN set -ex -o pipefail; \
 	| xargs -P 8 -l -d " " go get -v; \
     echo -n \
 	github.com/PuerkitoBio/goquery              \
+	github.com/aws/aws-sdk-go                   \
 	github.com/dgrijalva/jwt-go                 \
 	github.com/go-playground/pure/...           \
 	github.com/go-sql-driver/mysql              \
