@@ -50,8 +50,8 @@ jobs:
         <<: *default-job
     alpine-nginx:
         <<: *default-job
-    alpine-nginx-php:
-        <<: *default-job
+    # alpine-nginx-php:
+    #     <<: *default-job
     build-alpine:
         <<: *default-job
     build-nodejs:
@@ -70,7 +70,7 @@ workflows:
         jobs:
             - alpine-narada4d
             - alpine-nginx
-            - alpine-nginx-php
+            # - alpine-nginx-php
             - build-alpine
             - build-nodejs
             - build-golang
