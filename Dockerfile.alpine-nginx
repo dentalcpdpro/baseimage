@@ -10,10 +10,13 @@ RUN set -x -e -o pipefail; \
     ### Cleanup
     apk del $build_pkgs
 
-CMD set -x -e -o pipefail; \
+ENTRYPOINT set -x -e -o pipefail; \
     export NAMESERVER=$(grep '^\s*nameserver\s' /etc/resolv.conf | head -n 1 | awk '{print $2}'); \
     for f in $(find /etc/nginx -type f -name '*.tmpl'); do gotmpl <$f >${f%.tmpl}; done; \
-    exec nginx -g 'daemon off;'
+    ! test -f /entrypoint.sh || sh /entrypoint.sh; \
+    exec "$0" "$@";
+
+CMD ["nginx", "-g", "daemon off;"]
 
 ARG UPGRADE
 RUN echo $UPGRADE > /var/cache/UPGRADE && \
