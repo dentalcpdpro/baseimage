@@ -1,9 +1,19 @@
-FROM nginx:alpine
+FROM nginx:stable-alpine
 
-CMD exec sh -c " \
-    awk '/nameserver/{printf\"resolver %s;\\n\",\$2}' /etc/resolv.conf >/etc/nginx/conf.d/resolver.conf; \
-    exec nginx -g 'daemon off;'; \
-    "
+RUN set -x -e -o pipefail; \
+    build_pkgs="wget"; \
+    apk add --no-cache $build_pkgs; \
+    ### gotmpl
+    GOTMPL="1.1.1"; \
+    wget -q -O /usr/local/bin/gotmpl https://github.com/powerman/gotmpl/releases/download/v$GOTMPL/gotmpl-`uname -s`-`uname -m`; \
+    chmod +x /usr/local/bin/gotmpl; \
+    ### Cleanup
+    apk del $build_pkgs
+
+CMD set -x -e -o pipefail; \
+    export NAMESERVER=$(grep '^\s*nameserver\s' /etc/resolv.conf | head -n 1 | awk '{print $2}'); \
+    for f in $(find /etc/nginx -type f -name '*.tmpl'); do gotmpl <$f >${f%.tmpl}; done; \
+    exec nginx -g 'daemon off;'
 
 ARG UPGRADE
 RUN echo $UPGRADE > /var/cache/UPGRADE && \
