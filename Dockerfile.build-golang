@@ -1,5 +1,5 @@
 # https://github.com/golang/go/issues/14481
-FROM golang:1.10
+FROM golang:1.11
 
 # Debian's /bin/sh doesn't support `set -o pipefail`.
 SHELL ["/bin/bash", "-c"]
@@ -97,14 +97,14 @@ RUN set -ex -o pipefail; \
     export GOBIN=/tmp/bin; \
     go get -v golang.org/x/{crypto,net,text,tools}/...; \
     ### Speedup static build
-    go get -v -t all; \
+    go get -v -t all || :; \
     for i in 1 2; do CGO_ENABLED=0 go install -v -installsuffix static all || go get -v -t all || :; done; \
     unset GOBIN; \
     ### Tools
+    curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.12; \
     echo -n \
 	github.com/alecthomas/gometalinter          \
 	github.com/cheekybits/genny/generic         \
-	github.com/golangci/golangci-lint/cmd/...   \
 	github.com/powerman/gotestcover             \
 	golang.org/x/tools/cmd/cover                \
 	| xargs -P 8 -l -d " " go get -v; \
