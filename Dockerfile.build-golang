@@ -4,9 +4,10 @@ FROM golang:1.11
 # Debian's /bin/sh doesn't support `set -o pipefail`.
 SHELL ["/bin/bash", "-c"]
 
+ENV LANG=C.UTF-8
+
 ENTRYPOINT \
     setup-volume true; \
-    chmod 0777 $VOLUME_DIR/..; \
     HOME=/home/app exec chpst -u $(groups app | sed 's/ /:/g;s/:\+/:/g') "$0" "$@";
 
 RUN set -ex -o pipefail; \
@@ -14,11 +15,10 @@ RUN set -ex -o pipefail; \
     mkdir -p /usr/local/lib/site_perl; \
     build_pkgs="unzip"; \
     apt update; \
-    # libsasl2-dev for github.com/hashicorp/consul ?!?!?
     apt install -y --no-install-recommends $build_pkgs \
-	sudo runit jq libsasl2-dev; \
+	sudo runit jq; \
     ### docker
-    DOCKER="17.12.1-ce"; \
+    DOCKER="18.03.1-ce"; \
     wget -q -O /tmp/docker.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$DOCKER.tgz; \
     tar -xz -C /tmp -f /tmp/docker.tgz; \
     mv /tmp/docker/docker /usr/bin; \
@@ -31,7 +31,7 @@ RUN set -ex -o pipefail; \
     unzip /tmp/awscli-bundle.zip -d /tmp; \
     /tmp/awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws; \
     ### setup-volume
-    SETUP_VOLUME="0.2.0"; \
+    SETUP_VOLUME="0.2.2"; \
     wget -q -O /usr/local/sbin/setup-volume https://raw.githubusercontent.com/powerman/alpine-runit-volume/v$SETUP_VOLUME/setup-volume; \
     chmod +x /usr/local/sbin/setup-volume; \
     ### migrate
@@ -51,68 +51,3 @@ RUN set -ex -o pipefail; \
 ARG UPGRADE
 RUN echo $UPGRADE > /var/cache/UPGRADE && \
     apt update && apt full-upgrade -y && rm -rf /var/lib/apt/lists/*
-
-ARG UPGRADE_GO
-RUN set -ex -o pipefail; \
-    echo $UPGRADE_GO > /var/cache/UPGRADE_GO; \
-    ### Common dependencies for our projects
-    # https://github.com/golang/go/issues/18315
-    echo -n \
-	golang.org/x/sys/unix                       \
-	github.com/go-playground/locales/...        \
-	github.com/go-playground/form               \
-	| xargs -P 8 -l -d " " go get -v; \
-    echo -n \
-	github.com/PuerkitoBio/goquery              \
-	github.com/aws/aws-sdk-go                   \
-	github.com/dgrijalva/jwt-go                 \
-	github.com/go-playground/pure/...           \
-	github.com/go-sql-driver/mysql              \
-	github.com/gorilla/websocket                \
-	github.com/hashicorp/consul/...             \
-	github.com/nbutton23/zxcvbn-go              \
-	github.com/pborman/uuid                     \
-	github.com/powerman/check                   \
-	github.com/powerman/gotest/...              \
-	github.com/powerman/must                    \
-	github.com/powerman/narada-go/...           \
-	github.com/powerman/narada4d/...            \
-	github.com/powerman/rpc-codec/jsonrpc2      \
-	github.com/powerman/structlog               \
-	github.com/powerman/urlvalues               \
-	github.com/smartystreets/assertions/...     \
-	github.com/smartystreets/gunit              \
-	github.com/stretchr/objx                    \
-	github.com/stretchr/testify/...             \
-	github.com/stripe/stripe-go                 \
-	gopkg.in/check.v1                           \
-	gopkg.in/go-playground/assert.v1            \
-	gopkg.in/go-playground/mold.v2/modifiers    \
-	gopkg.in/go-playground/validator.v9         \
-	gopkg.in/yaml.v2                            \
-	gotest.tools/...                            \
-	| xargs -P 8 -l -d " " go get -v; \
-    # https://github.com/go-playground/pure/issues/7
-    rm -rf $(go env GOPATH)/src/github.com/go-playground/universal-translator/examples/; \
-    export GOBIN=/tmp/bin; \
-    go get -v golang.org/x/{crypto,net,text,tools}/...; \
-    ### Speedup static build
-    go get -v -t all || :; \
-    for i in 1 2; do CGO_ENABLED=0 go install -v -installsuffix static all || go get -v -t all || :; done; \
-    unset GOBIN; \
-    ### Tools
-    curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.12; \
-    echo -n \
-	github.com/alecthomas/gometalinter          \
-	github.com/cheekybits/genny/generic         \
-	github.com/powerman/gotestcover             \
-	golang.org/x/tools/cmd/cover                \
-	| xargs -P 8 -l -d " " go get -v; \
-    gometalinter --install; \
-    ### Enable `go get` as user "app"
-    # Keep /go/src ctime/mtime less than /go/{bin,pkg}
-    chmod -R a+rwX /go/src; \
-    chmod -R a+rwX /go/bin /go/pkg; \
-    find /go/bin /go/pkg -type f -print0 | xargs -0 touch; \
-    ### Cleanup
-    rm -rf /tmp/bin
