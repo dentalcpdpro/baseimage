@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM alpine:3.8
 
 COPY paxmark /usr/local/bin/
 
@@ -10,7 +10,7 @@ ENTRYPOINT \
 
 RUN set -ex -o pipefail; \
     mkdir -p /usr/local/sbin; \
-    sed -n -e 's/^/@edge /;s/v3.7/edge/p' /etc/apk/repositories >>/etc/apk/repositories; \
+    sed -n -e 's/^/@edge /;s/v3.8/edge/p' /etc/apk/repositories >>/etc/apk/repositories; \
     apk update; \
     apk upgrade --purge --available; \
     build_pkgs="wget"; \
