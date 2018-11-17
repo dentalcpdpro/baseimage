@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM alpine:3.8
 
 COPY paxmark /usr/local/bin/
 
@@ -10,7 +10,7 @@ ENTRYPOINT \
 
 RUN set -ex -o pipefail; \
     mkdir -p /usr/local/sbin; \
-    sed -n -e 's/^/@edge /;s/v3.7/edge/p' /etc/apk/repositories >>/etc/apk/repositories; \
+    sed -n -e 's/^/@edge /;s/v3.8/edge/p' /etc/apk/repositories >>/etc/apk/repositories; \
     apk update; \
     apk upgrade --purge --available; \
     build_pkgs="wget"; \
@@ -22,19 +22,19 @@ RUN set -ex -o pipefail; \
     echo em /usr/bin/node > /etc/paxmark.d/nodejs; \
     echo em /usr/lib/chromium/chrome >/etc/paxmark.d/chromium; \
     ### docker
-    DOCKER="17.12.1-ce"; \
+    DOCKER="18.03.1-ce"; \
     wget -q -O /tmp/docker.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$DOCKER.tgz; \
     tar -xz -C /tmp -f /tmp/docker.tgz; \
     mv /tmp/docker/docker /usr/bin; \
     ### glibc for docker-compose
     # https://github.com/docker/compose/blob/master/Dockerfile.run
-    GLIBC="2.27-r0"; \
-    wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://raw.githubusercontent.com/sgerrand/alpine-pkg-glibc/master/sgerrand.rsa.pub; \
+    GLIBC="2.28-r0"; \
+    wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub; \
     wget -q -O /tmp/glibc-$GLIBC.apk https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$GLIBC/glibc-$GLIBC.apk; \
     apk add /tmp/glibc-$GLIBC.apk; \
     ln -s /lib/libz.so.1 /lib/libc.musl-x86_64.so.1 /usr/glibc-compat/lib/; \
     ### docker-compose
-    DOCKER_COMPOSE="1.21.2"; \
+    DOCKER_COMPOSE="1.19.0"; \
     wget -q -O /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE/docker-compose-`uname -s`-`uname -m`; \
     chmod +x /usr/local/bin/docker-compose; \
     ### AWS cli
@@ -42,7 +42,7 @@ RUN set -ex -o pipefail; \
     unzip /tmp/awscli-bundle.zip -d /tmp; \
     /tmp/awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws; \
     ### setup-volume
-    SETUP_VOLUME="0.2.0"; \
+    SETUP_VOLUME="0.2.2"; \
     wget -q -O /usr/local/sbin/setup-volume https://raw.githubusercontent.com/powerman/alpine-runit-volume/v$SETUP_VOLUME/setup-volume; \
     chmod +x /usr/local/sbin/setup-volume; \
     ### gotmpl
