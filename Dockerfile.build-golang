@@ -18,32 +18,27 @@ RUN set -ex -o pipefail; \
     apt install -y --no-install-recommends $build_pkgs \
 	sudo runit jq; \
     ### docker
-    DOCKER="18.03.1-ce"; \
-    wget -q -O /tmp/docker.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$DOCKER.tgz; \
-    tar -xz -C /tmp -f /tmp/docker.tgz; \
+    DOCKER_VER="18.03.1-ce"; \
+    wget -q -O - https://download.docker.com/linux/static/stable/x86_64/docker-$DOCKER_VER.tgz | tar -xzf - -C /tmp; \
     mv /tmp/docker/docker /usr/bin; \
     ### docker-compose
-    DOCKER_COMPOSE="1.19.0"; \
-    wget -q -O /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE/docker-compose-`uname -s`-`uname -m`; \
-    chmod +x /usr/local/bin/docker-compose; \
+    DOCKER_COMPOSE_VER="1.19.0"; \
+    wget -q -O - https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VER/docker-compose-`uname -s`-`uname -m` | install /dev/stdin /usr/local/bin/docker-compose; \
     ### AWS cli
     wget -q -O /tmp/awscli-bundle.zip https://s3.amazonaws.com/aws-cli/awscli-bundle.zip; \
     unzip /tmp/awscli-bundle.zip -d /tmp; \
     /tmp/awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws; \
     ### setup-volume
-    SETUP_VOLUME="0.2.2"; \
-    wget -q -O /usr/local/sbin/setup-volume https://raw.githubusercontent.com/powerman/alpine-runit-volume/v$SETUP_VOLUME/setup-volume; \
-    chmod +x /usr/local/sbin/setup-volume; \
+    SETUP_VOLUME_VER="0.2.2"; \
+    wget -q -O - https://raw.githubusercontent.com/powerman/alpine-runit-volume/v$SETUP_VOLUME_VER/setup-volume | install /dev/stdin /usr/local/sbin/setup-volume; \
     ### migrate
-    MIGRATE="0.2.6"; \
-    wget -q -O /tmp/migrate.tgz https://github.com/powerman/migrate/archive/v$MIGRATE.tar.gz; \
-    tar xzf /tmp/migrate.tgz -C /tmp/; \
-    mv /tmp/migrate-$MIGRATE/script/* /usr/local/bin/; \
-    mv /tmp/migrate-$MIGRATE/lib/* /usr/local/lib/site_perl/; \
-    ### gotmpl
-    GOTMPL="1.1.1"; \
-    wget -q -O /usr/local/bin/gotmpl https://github.com/powerman/gotmpl/releases/download/v$GOTMPL/gotmpl-`uname -s`-`uname -m`; \
-    chmod +x /usr/local/bin/gotmpl; \
+    MIGRATE_VER="0.2.6"; \
+    wget -q -O - https://github.com/powerman/migrate/archive/v$MIGRATE_VER.tar.gz | tar xzf - -C /tmp/; \
+    mv /tmp/migrate-$MIGRATE_VER/script/* /usr/local/bin/; \
+    mv /tmp/migrate-$MIGRATE_VER/lib/* /usr/local/lib/site_perl/; \
+    ### dockerize
+    DOCKERIZE_VER="0.10.0"; \
+    wget -q -O - https://github.com/powerman/dockerize/releases/download/v$DOCKERIZE_VER/dockerize-`uname -s`-`uname -m` | install /dev/stdin /usr/local/bin/dockerize; \
     ### Cleanup
     apt autoremove -y $build_pkgs; \
     rm -rf /var/lib/apt/lists/* /tmp/*
