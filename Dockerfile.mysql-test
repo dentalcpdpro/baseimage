@@ -1,15 +1,32 @@
 FROM mysql:5.6
 
-RUN set -ex; \
+# Debian's /bin/sh doesn't support `set -o pipefail`.
+SHELL ["/bin/bash", "-c"]
+
+COPY mysql /etc/mysql/mysql.conf.d
+
+RUN set -ex -o pipefail; \
+    mkdir -p /usr/local/sbin; \
+    mkdir -p /usr/local/lib/site_perl; \
+    build_pkgs="ca-certificates curl"; \
+    apt update; \
+    apt install -y --no-install-recommends $build_pkgs; \
+    ### dockerize
+    DOCKERIZE_VER="0.10.0"; \
+    curl -sfL https://github.com/powerman/dockerize/releases/download/v$DOCKERIZE_VER/dockerize-`uname -s`-`uname -m` | install /dev/stdin /usr/local/bin/dockerize; \
+    ### init DB
     MYSQL_ALLOW_EMPTY_PASSWORD=yes docker-entrypoint.sh --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci & \
-    while ! echo SELECT 1 | mysql -uroot -h127.0.0.1 2>/dev/null | grep -qx 1; do sleep 1; done; \
+    dockerize -wait tcp://127.0.0.1:3306; \
     pid="$(cat /var/run/mysqld/mysqld.pid)"; \
     kill -s TERM "$pid"; \
     wait "$pid"; \
-    cp -a /var/lib/mysql /var/lib/mysql.ready
+    tar czf /var/lib/mysql.tgz -C /var/lib mysql; \
+    ### Cleanup
+    apt autoremove -y $build_pkgs; \
+    rm -rf /var/lib/apt/lists/* /tmp/*
 
 ENTRYPOINT ["bash", "-c", " \
-    test -d /var/lib/mysql/mysql || cp -a /var/lib/mysql.ready/* /var/lib/mysql && \
+    test -d /var/lib/mysql/mysql || tar xzpf /var/lib/mysql.tgz -C /var/lib; \
     exec docker-entrypoint.sh \"$0\" \"$@\" \
     "]
 CMD ["mysqld"]
