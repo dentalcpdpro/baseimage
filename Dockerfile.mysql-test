@@ -5,14 +5,14 @@ SHELL ["/bin/bash", "-c"]
 
 COPY mysql /etc/mysql/mysql.conf.d
 
+ENV DOCKERIZE_VER="0.11.2"
+
 RUN set -ex -o pipefail; \
     mkdir -p /usr/local/sbin; \
     mkdir -p /usr/local/lib/site_perl; \
     build_pkgs="ca-certificates curl"; \
     apt update; \
     apt install -y --no-install-recommends $build_pkgs; \
-    ### dockerize
-    DOCKERIZE_VER="0.10.0"; \
     curl -sfL https://github.com/powerman/dockerize/releases/download/v$DOCKERIZE_VER/dockerize-`uname -s`-`uname -m` | install /dev/stdin /usr/local/bin/dockerize; \
     ### init DB
     MYSQL_ALLOW_EMPTY_PASSWORD=yes docker-entrypoint.sh --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci & \
