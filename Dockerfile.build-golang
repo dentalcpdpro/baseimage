@@ -16,7 +16,7 @@ ENV LANG=C.UTF-8 \
     SETUP_VOLUME_VER="0.3.0" \
     DOCKERIZE_VER="0.11.2" \
     MIGRATE_VER="0.2.6"; \
-    GOLANGCI_LINT_VER="1.24.1"
+    GOLANGCI_LINT_VER="1.24.0"
 
 RUN set -ex -o pipefail; \
     mkdir -p /usr/local/sbin; \
