@@ -1,59 +1,42 @@
-FROM alpine:3.8
+FROM alpine:3.11.5
 
-COPY paxmark /usr/local/bin/
-
+# Needed for local development (CI overwrite entrypoint and run as root anyway).
 ENTRYPOINT \
-    paxmark; \
     setup-volume true; \
     test -d /.cache && ln -s /.cache /home/app; \
-    HOME=/home/app exec chpst -u $(groups app | sed 's/ /:/g;s/:\+/:/g') "$0" "$@"
+    HOME=/home/app exec chpst -u $(groups app | sed 's/ /:/g;s/:\+/:/g') "$0" "$@";
+
+ENV DOCKER_VER="19.03.8" \
+    DOCKER_COMPOSE_VER="1.25.2" \
+    SETUP_VOLUME_VER="0.3.0" \
+    DOCKERIZE_VER="0.11.2" \
+    GLIBC_VER="2.29-r0" \
+    GOTMPL_VER="1.1.1"
 
 RUN set -ex -o pipefail; \
     mkdir -p /usr/local/sbin; \
-    sed -n -e 's/^/@edge /;s/v3.8/edge/p' /etc/apk/repositories >>/etc/apk/repositories; \
-    apk update; \
-    apk upgrade --purge --available; \
-    build_pkgs="wget"; \
+    build_pkgs=""; \
     apk add $build_pkgs \
-	git openssh-client tar gzip ca-certificates bash attr runit sudo \
-	python jq yarn@edge nodejs chromium@edge; \
-    ### Compatibility with PaX kernel for existing packages
-    mkdir -p /etc/paxmark.d; \
-    echo em /usr/bin/node > /etc/paxmark.d/nodejs; \
-    echo em /usr/lib/chromium/chrome >/etc/paxmark.d/chromium; \
-    ### docker
-    DOCKER="18.03.1-ce"; \
-    wget -q -O /tmp/docker.tgz https://download.docker.com/linux/static/stable/x86_64/docker-$DOCKER.tgz; \
-    tar -xz -C /tmp -f /tmp/docker.tgz; \
-    mv /tmp/docker/docker /usr/bin; \
-    ### glibc for docker-compose
-    # https://github.com/docker/compose/blob/master/Dockerfile.run
-    GLIBC="2.28-r0"; \
+	git openssh-client tar gzip ca-certificates curl wget bash attr runit sudo \
+	python jq yarn nodejs chromium; \
+    wget -q -O - https://download.docker.com/linux/static/stable/x86_64/docker-$DOCKER_VER.tgz | tar -xzf - -O docker/docker    | install /dev/stdin /usr/local/bin/docker; \
+    wget -q -O - https://github.com/docker/compose/releases/download/v$DOCKER_COMPOSE_VER/docker-compose-`uname -s`-`uname -m`  | install /dev/stdin /usr/local/bin/docker-compose; \
+    wget -q -O - https://raw.githubusercontent.com/powerman/alpine-runit-volume/v$SETUP_VOLUME_VER/setup-volume                 | install /dev/stdin /usr/local/sbin/setup-volume; \
+    wget -q -O - https://github.com/powerman/dockerize/releases/download/v$DOCKERIZE_VER/dockerize-`uname -s`-`uname -m`        | install /dev/stdin /usr/local/bin/dockerize; \
+    wget -q -O - https://github.com/powerman/gotmpl/releases/download/v$GOTMPL_VER/gotmpl-`uname -s`-`uname -m`                 | install /dev/stdin /usr/local/bin/gotmpl; \
+    # glibc for docker-compose https://github.com/docker/compose/blob/master/Dockerfile.run
     wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub; \
-    wget -q -O /tmp/glibc-$GLIBC.apk https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$GLIBC/glibc-$GLIBC.apk; \
-    apk add /tmp/glibc-$GLIBC.apk; \
+    wget -q -O /tmp/glibc-$GLIBC_VER.apk https://github.com/sgerrand/alpine-pkg-glibc/releases/download/$GLIBC_VER/glibc-$GLIBC_VER.apk; \
+    apk add /tmp/glibc-$GLIBC_VER.apk; \
     ln -s /lib/libz.so.1 /lib/libc.musl-x86_64.so.1 /usr/glibc-compat/lib/; \
-    ### docker-compose
-    DOCKER_COMPOSE="1.19.0"; \
-    wget -q -O /usr/local/bin/docker-compose https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE/docker-compose-`uname -s`-`uname -m`; \
-    chmod +x /usr/local/bin/docker-compose; \
-    ### AWS cli
+    # AWS cli
     wget -q -O /tmp/awscli-bundle.zip https://s3.amazonaws.com/aws-cli/awscli-bundle.zip; \
     unzip /tmp/awscli-bundle.zip -d /tmp; \
     /tmp/awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws; \
-    ### setup-volume
-    SETUP_VOLUME="0.2.2"; \
-    wget -q -O /usr/local/sbin/setup-volume https://raw.githubusercontent.com/powerman/alpine-runit-volume/v$SETUP_VOLUME/setup-volume; \
-    chmod +x /usr/local/sbin/setup-volume; \
-    ### gotmpl
-    GOTMPL="1.1.1"; \
-    wget -q -O /usr/local/bin/gotmpl https://github.com/powerman/gotmpl/releases/download/v$GOTMPL/gotmpl-`uname -s`-`uname -m`; \
-    chmod +x /usr/local/bin/gotmpl; \
     ### yarn common deps (binary packages which download themselves on install)
-    paxmark; \
     yarn global add ember-cli bower npm node-sass phantomjs-prebuilt; \
     ### Cleanup
-    apk del $build_pkgs; \
+    # apk del $build_pkgs; \
     rm -rf /tmp/*
 
 ARG UPGRADE
@@ -63,5 +46,4 @@ RUN echo $UPGRADE > /var/cache/UPGRADE && \
 ARG UPGRADE_YARN
 RUN set -ex -o pipefail; \
     echo $UPGRADE_YARN > /var/cache/UPGRADE_YARN; \
-    paxmark; \
     yarn global upgrade
