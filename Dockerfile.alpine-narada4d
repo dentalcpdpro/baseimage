@@ -1,4 +1,4 @@
-FROM powerman/alpine-runit-volume
+FROM powerman/alpine-runit-volume:v0.3.1
 
 ENV VOLUME_DIR=/data \
     SYSLOG_DIR=/data/log \
