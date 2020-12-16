@@ -1,18 +1,21 @@
 default-job: &default-job
         docker:
             - image: docker:17.06.2-ce-git
+              auth:
+                username: "$DOCKER_USER"
+                password: "$DOCKER_PASS"
         steps:
             - checkout
             - setup_remote_docker
             - run:
                 name: Load docker image layer cache
                 command: |
-                    docker pull cpdpro/baseimage:$CIRCLE_JOB || true
+                    docker pull ghcr.io/dentalcpdpro/baseimage-$CIRCLE_JOB || true
             - run:
                 name: Checking for upgrade
                 command: |
-                    if docker image ls -q cpdpro/baseimage:$CIRCLE_JOB | grep -q .; then
-                        docker create --name check --rm --entrypoint=sh cpdpro/baseimage:$CIRCLE_JOB -c /upgrade
+                    if docker image ls -q ghcr.io/dentalcpdpro/baseimage-$CIRCLE_JOB | grep -q .; then
+                        docker create --name check --rm --entrypoint=sh ghcr.io/dentalcpdpro/baseimage-$CIRCLE_JOB -c /upgrade
                         docker cp -L upgrade.$CIRCLE_JOB check:/upgrade
                         docker start -a check > /tmp/build-args || true
                     fi
@@ -24,23 +27,23 @@ default-job: &default-job
                 command: |
                     docker build \
                         $(cat /tmp/build-args) \
-                        --cache-from cpdpro/baseimage:$CIRCLE_JOB \
-                        -t cpdpro/baseimage:$CIRCLE_JOB \
+                        --cache-from ghcr.io/dentalcpdpro/baseimage-$CIRCLE_JOB \
+                        -t ghcr.io/dentalcpdpro/baseimage-$CIRCLE_JOB \
                         -f Dockerfile.$CIRCLE_JOB \
                         .
                     if test "$CIRCLE_BUILD_NUM"; then # empty on local circleci
                         docker tag \
-                            cpdpro/baseimage:$CIRCLE_JOB \
-                            cpdpro/baseimage:$CIRCLE_JOB.$CIRCLE_BUILD_NUM
+                            ghcr.io/dentalcpdpro/baseimage-$CIRCLE_JOB \
+                            ghcr.io/dentalcpdpro/baseimage-$CIRCLE_JOB:$CIRCLE_BUILD_NUM
                     fi
             - deploy:
                 name: docker push
                 command: |
-                    if test "$CIRCLE_BRANCH" = "master" && test "$DOCKER_USER"; then
-                        docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
-                        docker push cpdpro/baseimage:$CIRCLE_JOB
+                    if test "$CIRCLE_BRANCH" = "master" && test "$GHCR_DOCKER_USER"; then
+                        docker login -u "$GHCR_DOCKER_USER" -p "$GHCR_DOCKER_PASS" ghcr.io
+                        docker push ghcr.io/dentalcpdpro/baseimage-$CIRCLE_JOB
                         if test "$CIRCLE_BUILD_NUM"; then # empty on local circleci
-                            docker push cpdpro/baseimage:$CIRCLE_JOB.$CIRCLE_BUILD_NUM
+                            docker push ghcr.io/dentalcpdpro/baseimage-$CIRCLE_JOB:$CIRCLE_BUILD_NUM
                         fi
                     fi
 
