@@ -8,7 +8,7 @@ COPY paxmark.debian /usr/local/bin/paxmark
 
 RUN set -ex -o pipefail; \
     apt update; \
-    apt install -y --no-install-recommends attr; \
+    apt install -y --force-yes --no-install-recommends attr; \
     mkdir -p /etc/paxmark.d; \
     echo em /athenapdf/athenapdf > /etc/paxmark.d/athenapdf; \
     rm -rf /var/lib/apt/lists/*
